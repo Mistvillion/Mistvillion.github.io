@@ -1,0 +1,7 @@
+/* 固定背景图片 */
+#web_bg {
+  background-attachment: fixed !important;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
