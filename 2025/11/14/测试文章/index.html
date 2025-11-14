@@ -167,7 +167,7 @@
     const countELement = document.getElementById('twikoo-count')
     if(!countELement) return
     twikoo.getCommentsCount({
-      envId: '',
+      envId: 'mongodb+srv://964476541_db_user:liu061012@cluster0.6hathjx.mongodb.net/?appName=Cluster0',
       region: '',
       urls: [window.location.pathname],
       includeReply: false
@@ -181,7 +181,7 @@
   const init = (el = document, path = location.pathname) => {
     twikoo.init({
       el: el.querySelector('#twikoo-wrap'),
-      envId: '',
+      envId: 'mongodb+srv://964476541_db_user:liu061012@cluster0.6hathjx.mongodb.net/?appName=Cluster0',
       region: '',
       onCommentLoaded: () => {
         btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
