@@ -218,7 +218,6 @@ template {
 .container.post-content hr:before,
 #post .post-copyright:before,
 #post #post-outdate-notice:before,
-.note:not(.no-icon)::before,
 .search-dialog hr:before {
   display: inline-block;
   font-weight: 600;
@@ -6556,7 +6555,7 @@ blockquote.pullquote.right {
 .note h4,
 .note h5,
 .note h6 {
-  margin-top: 3px;
+  margin-top: 0;
   margin-bottom: 0;
   padding-top: 0 !important;
   border-bottom: initial;
@@ -6582,15 +6581,6 @@ blockquote.pullquote.right {
 .note .img-alt {
   margin: 5px 0 10px;
 }
-.note:not(.no-icon) {
-  padding-left: 3em;
-}
-.note:not(.no-icon)::before {
-  position: absolute;
-  top: calc(50% - 0.95em);
-  left: 0.8em;
-  font-size: larger;
-}
 .note.default.flat {
   background: var(--note-default-bg);
   color: var(--font-color);
@@ -6614,12 +6604,6 @@ blockquote.pullquote.right {
 .note.default:not(.modern) h4,
 .note.default:not(.modern) h5,
 .note.default:not(.modern) h6 {
-  color: var(--note-default-text);
-}
-.note.default:not(.no-icon)::before {
-  content: '\f0a9';
-}
-.note.default:not(.no-icon):not(.modern)::before {
   color: var(--note-default-text);
 }
 .note.primary.flat {
@@ -6647,12 +6631,6 @@ blockquote.pullquote.right {
 .note.primary:not(.modern) h6 {
   color: var(--note-primary-text);
 }
-.note.primary:not(.no-icon)::before {
-  content: '\f055';
-}
-.note.primary:not(.no-icon):not(.modern)::before {
-  color: var(--note-primary-text);
-}
 .note.info.flat {
   background: var(--note-info-bg);
   color: var(--font-color);
@@ -6676,12 +6654,6 @@ blockquote.pullquote.right {
 .note.info:not(.modern) h4,
 .note.info:not(.modern) h5,
 .note.info:not(.modern) h6 {
-  color: var(--note-info-text);
-}
-.note.info:not(.no-icon)::before {
-  content: '\f05a';
-}
-.note.info:not(.no-icon):not(.modern)::before {
   color: var(--note-info-text);
 }
 .note.success.flat {
@@ -6709,12 +6681,6 @@ blockquote.pullquote.right {
 .note.success:not(.modern) h6 {
   color: var(--note-success-text);
 }
-.note.success:not(.no-icon)::before {
-  content: '\f058';
-}
-.note.success:not(.no-icon):not(.modern)::before {
-  color: var(--note-success-text);
-}
 .note.warning.flat {
   background: var(--note-warning-bg);
   color: var(--font-color);
@@ -6740,12 +6706,6 @@ blockquote.pullquote.right {
 .note.warning:not(.modern) h6 {
   color: var(--note-warning-text);
 }
-.note.warning:not(.no-icon)::before {
-  content: '\f06a';
-}
-.note.warning:not(.no-icon):not(.modern)::before {
-  color: var(--note-warning-text);
-}
 .note.danger.flat {
   background: var(--note-danger-bg);
   color: var(--font-color);
@@ -6769,12 +6729,6 @@ blockquote.pullquote.right {
 .note.danger:not(.modern) h4,
 .note.danger:not(.modern) h5,
 .note.danger:not(.modern) h6 {
-  color: var(--note-danger-text);
-}
-.note.danger:not(.no-icon)::before {
-  content: '\f056';
-}
-.note.danger:not(.no-icon):not(.modern)::before {
   color: var(--note-danger-text);
 }
 .container .series-items a:hover {
