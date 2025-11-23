@@ -22,6 +22,22 @@
   background: transparent !important;
 }
 
+#nav {
+  /* 背景纯透明 */
+  background-color: transparent !important;
+  /* 移除虚化和阴影 */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  /* 滑动过渡动画 */
+  transition: top 0.3s ease-in-out !important;
+}
+
+/* 修复菜单子选项背景 */
+#nav .menus_item_child, #nav .menus_items .menus_item {
+  background: transparent !important;
+}
 
 /* 小冰分类分类磁铁黑夜模式适配 */
 /* 一般状态 */
@@ -33,34 +49,4 @@
 [data-theme="dark"] .magnet_link_context:hover {
   background: #3ecdf1;
   color: #f2f2f2;
-}
-
-
-/* 强制导航栏背景变成透明毛玻璃 */
-#nav {
-    /* 0.2 的透明度，让背景透出来 */
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    
-    /* 强力模糊背景 20px */
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    
-    /* 稍微加一点阴影让它更有层次感 */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-    
-    /* 去除边框 */
-    border: none !important;
-}
-
-/* 适配深色模式（Dark Mode） */
-[data-theme="dark"] #nav {
-    /* 深色模式下用半透明黑色 */
-    background-color: rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(20px) !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* 修复：防止菜单文字背景也是白的 */
-#nav .menus_item_child, #nav .menus_items .menus_item {
-    background: transparent !important;
 }
