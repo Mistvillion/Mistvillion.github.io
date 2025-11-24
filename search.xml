@@ -25,27 +25,6 @@
     
     
     <entry>
-      <title>LeetCode100题纪念</title>
-      <link href="/2025/11/15/Programming/LeetCode&amp;Algorithm/LeetCode100%E9%A2%98%E7%BA%AA%E5%BF%B5/"/>
-      <url>/2025/11/15/Programming/LeetCode&amp;Algorithm/LeetCode100%E9%A2%98%E7%BA%AA%E5%BF%B5/</url>
-      
-        <content type="html"><![CDATA[<p>大一上学期刚开始学习C语言的时候曾打开过力扣，但当时不知道怎么写题，题目也看不太懂，就一直搁置着。2025年10月24日才想起来还有这样一个刷题网站。看见身边同学漂亮的数据，我虽然起步有点晚，但涓流积至沧溟水，拳石崇成泰华岑，只要功不唐捐，一定能有所成就。</p><p>昨天累计刷题量达到了100题，这是一个好的开始，还要继续努力。<br><img src="/img/post_article/LeetCode100题纪念/leetcode100.png" alt="100题图片"></p>]]></content>
-      
-      
-      <categories>
-          
-          <category> Programming </category>
-          
-          <category> LeetCode&amp;Algorithm </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>数据结构（一）（更新中）</title>
       <link href="/2025/11/15/Programming/Data%20Structures/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%88%E4%B8%80%EF%BC%89/"/>
       <url>/2025/11/15/Programming/Data%20Structures/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%88%E4%B8%80%EF%BC%89/</url>
@@ -67,18 +46,18 @@
     
     
     <entry>
-      <title>测试文章</title>
-      <link href="/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
-      <url>/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
+      <title>LeetCode100题纪念</title>
+      <link href="/2025/11/15/Programming/LeetCode&amp;Algorithm/LeetCode100%E9%A2%98%E7%BA%AA%E5%BF%B5/"/>
+      <url>/2025/11/15/Programming/LeetCode&amp;Algorithm/LeetCode100%E9%A2%98%E7%BA%AA%E5%BF%B5/</url>
       
-        <content type="html"><![CDATA[<p>这里是测试文章</p><p>主要用于测试写博客的功能</p>]]></content>
+        <content type="html"><![CDATA[<p>大一上学期刚开始学习C语言的时候曾打开过力扣，但当时不知道怎么写题，题目也看不太懂，就一直搁置着。2025年10月24日才想起来还有这样一个刷题网站。看见身边同学漂亮的数据，我虽然起步有点晚，但涓流积至沧溟水，拳石崇成泰华岑，只要功不唐捐，一定能有所成就。</p><p>昨天累计刷题量达到了100题，这是一个好的开始，还要继续努力。<br><img src="/img/post_article/LeetCode100题纪念/leetcode100.png" alt="100题图片"></p>]]></content>
       
       
       <categories>
           
-          <category> Prepare </category>
+          <category> Programming </category>
           
-          <category> test_article </category>
+          <category> LeetCode&amp;Algorithm </category>
           
       </categories>
       
@@ -100,6 +79,27 @@
           <category> Prepare </category>
           
           <category> hello_world </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>测试文章</title>
+      <link href="/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
+      <url>/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
+      
+        <content type="html"><![CDATA[<p>这里是测试文章</p><p>主要用于测试写博客的功能</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Prepare </category>
+          
+          <category> test_article </category>
           
       </categories>
       
