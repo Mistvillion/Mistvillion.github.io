@@ -67,27 +67,6 @@
     
     
     <entry>
-      <title>测试文章</title>
-      <link href="/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
-      <url>/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
-      
-        <content type="html"><![CDATA[<p>这里是测试文章</p><p>主要用于测试写博客的功能</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> Prepare </category>
-          
-          <category> test_article </category>
-          
-      </categories>
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>Hello World</title>
       <link href="/2025/11/14/Prepare/hello-world/"/>
       <url>/2025/11/14/Prepare/hello-world/</url>
@@ -100,6 +79,27 @@
           <category> Prepare </category>
           
           <category> hello_world </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>测试文章</title>
+      <link href="/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
+      <url>/2025/11/14/Prepare/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
+      
+        <content type="html"><![CDATA[<p>这里是测试文章</p><p>主要用于测试写博客的功能</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Prepare </category>
+          
+          <category> test_article </category>
           
       </categories>
       
