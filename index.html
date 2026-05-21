@@ -3,194 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mistvillion | 北城烟雨阁</title>
+    <title>北城烟雨阁</title>
     <style>
-        /* --- 全局样式设置 --- */
-        body, html {
+        @font-face {
+            font-family: "LXGW WenKai";
+            src: url("LXGW WenKai/LXGWWenKai-Regular.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "LXGW WenKai";
+            src: url("LXGW WenKai/LXGWWenKai-Medium.ttf") format("truetype");
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            color-scheme: dark;
+            --text: #eef8ff;
+            --glass: rgba(8, 16, 26, 0.34);
+            --line: rgba(238, 248, 255, 0.26);
+            --accent: #a9e7ef;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
             height: 100%;
             margin: 0;
-            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            color: #fff;
+        }
+
+        body {
+            min-height: 100vh;
             overflow: hidden;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            color: var(--text);
+            background: #03070d;
         }
 
-        /* --- 背景图片设置 --- */
-        .bg-image {
-            /* 请确保背景图片名为 background.png */
-            background-image: url('background.png'); 
-            height: 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
+        .page {
             position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            isolation: isolate;
         }
 
-        /* --- 内容容器 --- */
-        .container {
-            display: flex;
+        .background-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
             height: 100%;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 12%;
-            /* 背景遮罩加深一点，以突显“烟雨”的朦胧感和文字的清晰度 */
-            background-color: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(5px); 
-        }
-
-        /* --- 左侧个人信息区域 --- */
-        .left-profile {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 500px;
-        }
-
-        /* 头像样式 */
-        .avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            /* 边框使用青色，呼应“雨”与“星” */
-            border: 3px solid #afeeee; 
-            box-shadow: 0 0 15px rgba(175, 238, 238, 0.4); 
-            margin-bottom: 25px;
             object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .avatar:hover {
-             transform: rotate(360deg); /* 增加一点交互趣味 */
+            z-index: -3;
+            background: #03070d;
         }
 
-        /* 用户名样式 */
-        .username {
-            font-size: 3.2em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
-            /* 渐变文字效果，模拟晨曦或极光 */
-            background: linear-gradient(to right, #afeeee, #00bfff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-        }
-        
-        .subtitle {
-            font-size: 1.2em;
-            color: #d1e8ff;
-            margin-bottom: 25px;
-            font-weight: 300;
-            letter-spacing: 2px;
+        .video-shade {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 50% 44%, rgba(145, 210, 226, 0.12), transparent 34%),
+                linear-gradient(180deg, rgba(1, 4, 9, 0.2), rgba(1, 4, 9, 0.52));
+            pointer-events: none;
         }
 
-        /* 介绍文本框样式 */
-        .intro-box {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 8px;
-            /* 左侧青色装饰线 */
-            border-left: 4px solid #00bfff; 
-            line-height: 1.7;
-            font-size: 1em;
-            color: #e0f7fa;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-        
-        .intro-box p {
-            margin: 10px 0;
-        }
-        
-        /* 引用语特别样式 */
-        .quote {
-            font-style: italic;
-            color: #afeeee;
-            border-bottom: 1px dashed rgba(175, 238, 238, 0.3);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-
-        /* --- 右侧按钮区域 --- */
-        .right-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            align-items: flex-end;
-        }
-
-        /* 按钮样式 */
-        .btn {
-            text-decoration: none;
-            color: #afeeee; /* 青渺色字体 */
-            padding: 14px 0; /* 上下内边距 */
-            width: 180px;    /* 【修改】固定宽度，确保三个按钮大小完全一样 */
-            border: 1px solid #afeeee;
-            border-radius: 4px; /* 稍微方一点的圆角，显得更刚毅内敛 */
-            font-size: 1.2em;
+        .site-title {
+            margin: 0;
+            padding: 0 24px;
+            font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", serif;
+            font-size: clamp(3rem, 8vw, 8rem);
             font-weight: 500;
+            letter-spacing: 0.16em;
+            text-indent: 0.16em;
+            line-height: 1.1;
             text-align: center;
-            transition: all 0.3s ease;
-            background-color: rgba(0, 0, 0, 0.4);
+            text-shadow:
+                0 0 18px rgba(169, 231, 239, 0.34),
+                0 10px 42px rgba(0, 0, 0, 0.72);
+            user-select: none;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: clamp(18px, 4vw, 34px);
+            left: clamp(18px, 4vw, 34px);
+            z-index: 20;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+            background: rgba(3, 8, 14, 0.36);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            cursor: pointer;
+            transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+        }
+
+        .menu-toggle:hover,
+        .menu-toggle:focus-visible {
+            background: rgba(238, 248, 255, 0.12);
+            border-color: rgba(238, 248, 255, 0.44);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .menu-toggle span,
+        .menu-toggle::before,
+        .menu-toggle::after {
+            width: 22px;
+            height: 2px;
+            border-radius: 999px;
+            background: currentColor;
+            transition: transform 220ms ease, opacity 180ms ease;
+        }
+
+        .menu-toggle::before,
+        .menu-toggle::after {
+            content: "";
+            position: absolute;
+        }
+
+        .menu-toggle::before {
+            transform: translateY(-7px);
+        }
+
+        .menu-toggle::after {
+            transform: translateY(7px);
+        }
+
+        .menu-toggle[aria-expanded="true"] span {
+            opacity: 0;
+        }
+
+        .menu-toggle[aria-expanded="true"]::before {
+            transform: rotate(45deg);
+        }
+
+        .menu-toggle[aria-expanded="true"]::after {
+            transform: rotate(-45deg);
+        }
+
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            background: rgba(1, 4, 9, 0.08);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 220ms ease;
+        }
+
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            width: min(320px, calc(100vw - 32px));
+            height: 100%;
+            padding: 112px 28px 32px;
+            border-right: 1px solid var(--line);
+            background: var(--glass);
+            box-shadow: 24px 0 80px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(24px) saturate(130%);
+            -webkit-backdrop-filter: blur(24px) saturate(130%);
+            transform: translateX(-100%);
+            transition: transform 260ms ease;
+        }
+
+        body.menu-open .menu-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        body.menu-open .menu-panel {
+            transform: translateX(0);
+        }
+
+        .menu-links {
+            display: grid;
+            gap: 16px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            padding: 0 18px;
+            border: 1px solid rgba(238, 248, 255, 0.24);
+            border-radius: 8px;
+            color: var(--text);
+            background: rgba(238, 248, 255, 0.08);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            position: relative;
-            overflow: hidden;
+            transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
         }
 
-        /* 按钮悬停效果 */
-        .btn:hover {
-            background-color: #afeeee;
-            color: #0f172a; /* 悬停时文字变深色背景色 */
-            box-shadow: 0 0 25px rgba(175, 238, 238, 0.6);
-            transform: translateX(-5px); /* 向左微动，而非上浮 */
+        .menu-link:hover,
+        .menu-link:focus-visible {
+            color: #041018;
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateX(4px);
+            outline: none;
         }
-        
-        /* 响应式设计 */
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-                justify-content: center;
-                padding: 40px 20px;
-                text-align: center;
-                overflow-y: auto; /* 移动端允许滚动 */
+
+        @media (max-width: 640px) {
+            .site-title {
+                font-size: clamp(2.6rem, 14vw, 4.7rem);
+                letter-spacing: 0.1em;
+                text-indent: 0.1em;
             }
-            .left-profile {
-                align-items: center;
-                margin-bottom: 50px;
-                max-width: 100%;
+
+            .menu-panel {
+                padding-top: 96px;
             }
-            .intro-box {
-                text-align: left; /* 保持文字左对齐易于阅读 */
-            }
-            .right-buttons {
-                align-items: center;
-                width: 100%;
+
+            .menu-toggle {
+                width: 44px;
+                height: 44px;
             }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.001ms !important;
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="bg-image">
-        <div class="container">
-            <div class="left-profile">
-                <img src="https://github.com/Mistvillion.png" alt="Mistvillion Avatar" class="avatar">
-                <div class="username">Mistvillion</div>
-                <div class="subtitle">北城烟雨阁</div>
-                
-                <div class="intro-box">
-                    <p class="quote">“此情可待成追忆，只是当时已惘然。”</p>
-                    <p><strong>北城 (Bei Cheng)：</strong>如北辰居其所，是道德的典范，亦是暗夜孤守的精神灯塔。不似南城柔情，唯有内敛深沉与命运的刚毅。</p>
-                    <p><strong>Mistvillion：</strong>取 Mist (烟雨) 之朦胧，合 Pavilion (阁) 之雅致。在二进制的逻辑世界里，筑一阁以听雨，守一星以指路。</p>
-                </div>
-            </div>
+    <main class="page" aria-label="北城烟雨阁主页">
+        <video class="background-video" autoplay muted loop playsinline aria-hidden="true">
+            <source src="background-CityOfTears.mp4" type="video/mp4">
+        </video>
+        <div class="video-shade" aria-hidden="true"></div>
 
-            <div class="right-buttons">
-                <a href="https://github.com/Mistvillion" target="_blank" class="btn">GitHub</a>
-                <a href="https://blog.sparklerain.top/" target="_blank" class="btn">Blogs</a>
-                <a href="https://note.sparklerain.top/" target="_blank" class="btn">Notes</a>
-            </div>
-        </div>
-    </div>
+        <button class="menu-toggle" type="button" aria-label="打开导航菜单" aria-controls="site-menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+        </button>
+
+        <div class="menu-overlay" data-close-menu aria-hidden="true"></div>
+
+        <nav class="menu-panel" id="site-menu" aria-label="站点导航">
+            <ul class="menu-links">
+                <li><a class="menu-link" href="https://github.com/Mistvillion" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                <li><a class="menu-link" href="https://blog.sparklerain.top/" target="_blank" rel="noopener noreferrer">Blogs</a></li>
+                <li><a class="menu-link" href="https://note.sparklerain.top/" target="_blank" rel="noopener noreferrer">Notes</a></li>
+            </ul>
+        </nav>
+
+        <h1 class="site-title">北城烟雨阁</h1>
+    </main>
+
+    <script>
+        const body = document.body;
+        const menuToggle = document.querySelector(".menu-toggle");
+        const closeTargets = document.querySelectorAll("[data-close-menu]");
+
+        function setMenuOpen(isOpen) {
+            body.classList.toggle("menu-open", isOpen);
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+            menuToggle.setAttribute("aria-label", isOpen ? "关闭导航菜单" : "打开导航菜单");
+        }
+
+        menuToggle.addEventListener("click", () => {
+            setMenuOpen(!body.classList.contains("menu-open"));
+        });
+
+        closeTargets.forEach((target) => {
+            target.addEventListener("click", () => setMenuOpen(false));
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                setMenuOpen(false);
+            }
+        });
+    </script>
 </body>
 </html>
