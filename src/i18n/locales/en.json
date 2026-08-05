@@ -1,0 +1,32 @@
+{
+  "site": {
+    "name": "北城烟雨阁",
+    "kicker": "Mistvillion's Home"
+  },
+  "nav": {
+    "home": "Home",
+    "profile": "Profile",
+    "guestbook": "Guestbook",
+    "github": "GitHub",
+    "blogs": "Blogs",
+    "notes": "Notes",
+    "aria": "Site navigation"
+  },
+  "seo": {
+    "title": "北城烟雨阁",
+    "profileTitle": "Profile - 北城烟雨阁",
+    "guestbookTitle": "Guestbook - 北城烟雨阁"
+  },
+  "profile": {
+    "title": "Profile",
+    "bio": "This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction."
+  },
+  "guestbook": {
+    "title": "Guestbook",
+    "subtitle": "Feel free to leave a message.",
+    "notConfigured": "The guestbook is not configured yet. Fill in the Giscus config in src/config/guestbook.ts to enable it."
+  },
+  "lang": {
+    "switchTo": "Switch to 中文"
+  }
+}

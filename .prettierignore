@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+package-lock.json
+public/fonts
+public/images
+tools/font-source
+.husky
+*.woff2
+*.ttf

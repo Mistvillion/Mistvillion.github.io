@@ -1,36 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="北城烟雨阁 - Mistvillion 的个人主页" />
     <title>北城烟雨阁</title>
-    <link rel="icon" href="assets/images/favicon.jpg" type="image/jpeg">
-    <link rel="preload" href="assets/fonts/LXGWWenKai-Medium.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="assets/css/site.css">
-</head>
-<body>
-    <main class="page page--home" aria-label="北城烟雨阁主页">
-        <video class="background-video" autoplay muted loop playsinline aria-hidden="true">
-            <source src="assets/images/background-CityOfTears.mp4" type="video/mp4">
-        </video>
-        <div class="video-shade" aria-hidden="true"></div>
-
-        <nav class="top-nav" aria-label="站点导航">
-            <a class="nav-link" href="index.html" aria-current="page">HomePage</a>
-            <a class="nav-link" href="profile.html">Profile</a>
-            <a class="nav-link" href="https://github.com/Mistvillion" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a class="nav-link" href="https://blog.sparklerain.top/" target="_blank" rel="noopener noreferrer">Blogs</a>
-            <a class="nav-link" href="https://note.sparklerain.top/" target="_blank" rel="noopener noreferrer">Notes</a>
-        </nav>
-
-        <section class="home" aria-labelledby="site-title">
-            <div class="title-block">
-                <p class="site-kicker">Mistvillion's Home</p>
-                <h1 class="site-title" id="site-title">北城烟雨阁</h1>
-            </div>
-        </section>
-    </main>
-
-    <script src="assets/js/site.js"></script>
-</body>
+    <link
+      rel="preload"
+      href="/fonts/LXGWWenKai-subset.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
