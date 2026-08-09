@@ -2,11 +2,8 @@ const root = document.documentElement;
 const backgroundVideo = document.querySelector(".background-video");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const fontReady = document.fonts
-    ? document.fonts.load('500 1em "LXGW WenKai"', "北城烟雨阁")
-    : Promise.resolve();
-const safeFontReady = fontReady.catch(() => undefined);
-
+// Reveal is gated on the background only: the webfont is a small subset
+// loaded with font-display: swap, so the page must not wait for it.
 const videoReady = new Promise((resolve) => {
     if (!backgroundVideo || backgroundVideo.readyState >= 2) {
         resolve();
@@ -18,8 +15,8 @@ const videoReady = new Promise((resolve) => {
 });
 
 Promise.race([
-    Promise.all([safeFontReady, videoReady]),
-    new Promise((resolve) => setTimeout(resolve, 4000))
+    videoReady,
+    new Promise((resolve) => setTimeout(resolve, 3000))
 ]).then(() => {
     requestAnimationFrame(() => {
         root.classList.add("page-ready");
