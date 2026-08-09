@@ -1,13 +1,14 @@
-/* 北城烟雨阁 —— 页面切换逻辑
-   进入：背景图就绪后整页模糊淡入（3s 兜底）
-   离开：全屏遮罩淡出（520ms，与 CSS 一致）→ 跳转
-   预取：导航站内链接 hover/focus 时 rel=prefetch */
+/* Mistvillion's Home —— page transition logic
+   Enter: whole page blur-fades in once the background is ready (3s fallback)
+   Leave: full-screen veil (520ms, matches CSS) -> navigate
+   Prefetch: nav internal links prefetch on hover/focus */
 
 const root = document.documentElement;
 const pageBg = document.querySelector(".page-bg");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-// 进入动画只等背景图：字体是小体积子集 + font-display: swap，不阻塞首屏。
+// Entrance animation waits only for the background image: fonts load with
+// font-display: swap, so they never block first paint.
 const backgroundReady = new Promise((resolve) => {
     if (!pageBg || pageBg.readyState >= 2) {
         resolve();
@@ -26,12 +27,12 @@ Promise.race([
     });
 });
 
-// 浏览器往返缓存（bfcache）恢复时清除离开态
+// Clear the leaving state when the page is restored from the bfcache
 window.addEventListener("pageshow", () => {
     root.classList.remove("page-leaving");
 });
 
-/* ---------- 预取站内页面 ---------- */
+/* ---------- Prefetch internal pages ---------- */
 
 function prefetchPage(href) {
     if (!href || !href.endsWith(".html")) {
@@ -58,7 +59,7 @@ document.querySelectorAll(".top-nav a[href]").forEach((link) => {
     link.addEventListener("focus", () => prefetchPage(link.href), { once: true });
 });
 
-/* ---------- 站内切换：淡出 → 跳转 ---------- */
+/* ---------- Internal transition: fade out -> navigate ---------- */
 
 document.addEventListener("click", (event) => {
     const clickTarget = event.target instanceof Element
