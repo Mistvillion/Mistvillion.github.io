@@ -1,3 +1,7 @@
+/* 北城烟雨阁 —— 全站样式
+   字体：中文 → LXGW WenKai（15 字子集）；英文 → PT Serif（拉丁子集）
+   单一字体栈按字形自动分配。 */
+
 @font-face {
     font-family: "LXGW WenKai";
     src: url("../fonts/LXGWWenKai-Medium.woff2") format("woff2");
@@ -6,13 +10,29 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "PT Serif";
+    src: url("../fonts/PTSerif-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "PT Serif";
+    src: url("../fonts/PTSerif-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     color-scheme: dark;
     --text: #f6fbff;
-    --muted: rgba(246, 251, 255, 0.72);
+    --muted: rgba(246, 251, 255, 0.74);
     --line: rgba(246, 251, 255, 0.26);
     --gold: #f6d38a;
-    --cyan: #b9edf6;
+    --bg: #02060d;
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
     --motion-exit: cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -32,11 +52,16 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", serif;
+    font-family: "PT Serif", "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
     color: var(--text);
-    background: #02060d;
+    background: var(--bg);
 }
 
+a {
+    font: inherit;
+}
+
+/* 离开页面的全屏遮罩（与 site.js 的 520ms 配合） */
 body::before {
     content: "";
     position: fixed;
@@ -45,18 +70,14 @@ body::before {
     pointer-events: none;
     opacity: 0;
     background:
-        radial-gradient(circle at 18% 78%, rgba(185, 237, 246, 0.12), transparent 34%),
-        rgba(2, 6, 13, 0.78);
+        radial-gradient(circle at 18% 78%, rgba(246, 211, 138, 0.08), transparent 34%),
+        rgba(2, 6, 13, 0.8);
     backdrop-filter: blur(0);
     -webkit-backdrop-filter: blur(0);
     transition:
         opacity 520ms var(--motion-exit),
         backdrop-filter 520ms var(--motion-exit),
         -webkit-backdrop-filter 520ms var(--motion-exit);
-}
-
-a {
-    font: inherit;
 }
 
 .page {
@@ -93,7 +114,8 @@ html.page-leaving body::before {
     padding: 124px 72px 72px;
 }
 
-.background-video {
+/* 背景图 + 压暗层（页面就绪后淡入） */
+.page-bg {
     position: fixed;
     inset: 0;
     z-index: -3;
@@ -103,14 +125,14 @@ html.page-leaving body::before {
     opacity: 0;
     transform: scale(1.035);
     transform-origin: center;
-    background: #02060d;
+    background: var(--bg);
     transition:
         opacity 980ms var(--motion-soft),
         transform 1500ms var(--motion-soft);
     will-change: opacity, transform;
 }
 
-.video-shade {
+.bg-shade {
     position: fixed;
     inset: 0;
     z-index: -2;
@@ -123,25 +145,26 @@ html.page-leaving body::before {
     will-change: opacity;
 }
 
-html.page-ready .background-video {
+html.page-ready .page-bg {
     opacity: 1;
     transform: scale(1);
 }
 
-html.page-ready .video-shade {
+html.page-ready .bg-shade {
     opacity: 1;
 }
 
-html.page-leaving .background-video {
+html.page-leaving .page-bg {
     transform: scale(1.018);
     transition-duration: 520ms;
 }
 
-html.page-leaving .video-shade {
+html.page-leaving .bg-shade {
     opacity: 0.72;
     transition-duration: 520ms;
 }
 
+/* 右上角玻璃胶囊导航 */
 .top-nav {
     position: fixed;
     top: 28px;
@@ -202,11 +225,16 @@ html.page-leaving .video-shade {
 .nav-link:hover,
 .nav-link:focus-visible,
 .nav-link[aria-current="page"] {
-    color: var(--cyan);
+    color: var(--gold);
     outline: none;
     transform: translateY(-1px);
 }
 
+.nav-link[aria-current="page"] {
+    font-weight: 700;
+}
+
+/* Home 左下角标题块 */
 .home {
     width: min(760px, 100%);
 }
@@ -237,14 +265,14 @@ html.page-leaving .video-shade {
     margin: 0;
     font-size: 5.6rem;
     font-weight: 500;
-    letter-spacing: 0;
     line-height: 1.04;
     text-shadow:
-        0 0 20px rgba(157, 220, 231, 0.26),
+        0 0 20px rgba(246, 211, 138, 0.18),
         0 14px 54px rgba(0, 0, 0, 0.78);
     user-select: none;
 }
 
+/* Profile 正中内容 */
 .profile-view {
     width: 100%;
     min-height: calc(100vh - 196px);
@@ -255,6 +283,8 @@ html.page-leaving .video-shade {
 .profile-content {
     width: min(680px, 100%);
     margin: 0 auto;
+    display: grid;
+    gap: 14px;
     opacity: 0;
     transform: translate3d(0, 22px, 0);
     filter: blur(8px);
@@ -265,6 +295,22 @@ html.page-leaving .video-shade {
     will-change: opacity, transform, filter;
 }
 
+.profile-content h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.profile-content p {
+    max-width: 680px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.08rem;
+    line-height: 1.9;
+}
+
+/* 就绪后的模糊淡入 */
 html.page-ready .top-nav,
 html.page-ready .title-block,
 html.page-ready .profile-content {
@@ -282,6 +328,7 @@ html.page-ready .profile-content {
     transition-delay: 220ms;
 }
 
+/* 离开时的收起动画 */
 html.page-leaving .top-nav {
     opacity: 0;
     transform: translate3d(0, -14px, 0);
@@ -301,28 +348,7 @@ html.page-leaving .profile-content {
     transition-duration: 440ms;
 }
 
-.profile-heading {
-    display: grid;
-    gap: 14px;
-    margin-bottom: 30px;
-}
-
-.profile-view h1 {
-    margin: 0;
-    font-size: 3rem;
-    font-weight: 500;
-    letter-spacing: 0;
-    line-height: 1.25;
-}
-
-.profile-view p {
-    max-width: 680px;
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.08rem;
-    line-height: 1.9;
-}
-
+/* 响应式 */
 @media (max-width: 860px) {
     .page {
         min-height: 100svh;
@@ -384,7 +410,7 @@ html.page-leaving .profile-content {
         min-height: calc(100svh - 152px);
     }
 
-    .profile-view h1 {
+    .profile-content h1 {
         font-size: 2rem;
     }
 }

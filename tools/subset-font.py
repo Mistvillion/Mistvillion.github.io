@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Regenerate the site's subset webfont.
+"""重新生成站点 WenKai 字体子集。
 
-The site self-hosts LXGW WenKai as a subset: the full font is 24MB, the
-site's visible text is a few dozen characters. This script extracts every
-visible character from the *.html files in the repo root, subsets the
-source TTF, and writes the woff2 that the site actually loads.
+站点自托管 LXGW WenKai 的子集（全量 24MB，站点实际用字很少）。
+本脚本从仓库根的 *.html 中提取全部可见字符，子集化源 TTF 并输出 woff2。
 
-Run after adding any new text to the site (new pages, new copy) so the
-font keeps covering it. Missing glyphs silently fall back to the system
-font stack, so skipping this is not fatal — just inconsistent.
+改文案后运行一次：新增汉字自动并入子集，保证不出现缺字。
+（缺失字形会静默回退到系统字体栈，所以跳过本脚本不是致命，只是不一致。）
 
-Requires: python3 + fonttools with brotli (`pip install fonttools brotli`)
+要求：python3 + fonttools + brotli。macOS Homebrew Python 为外部管理，
+需用 venv：
+    python3 -m venv .venv && .venv/bin/pip install fonttools brotli
+然后以 .venv/bin/python3 运行本脚本。
+
+规范：字符集 = 全站可见汉字 + BONUS 通用标点/数字。
+aria-* 标签由读屏使用、不用网页字体，不纳入；<noscript> 内联样式非可见文本，不纳入。
 """
 import re
-import sys
 from pathlib import Path
 
 from fontTools import subset
@@ -23,16 +25,18 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "assets/fonts/LXGWWenKai-Medium.ttf"
 OUT = ROOT / "assets/fonts/LXGWWenKai-Medium.woff2"
 
-# Visible text only: aria-* labels are consumed by screen readers, which
-# do not use webfonts, so their glyphs do not need to be included.
+# 通用中文标点与数字：未来文案很可能用到，一并纳入，避免频繁重新子集化。
 BONUS = set("，。！？、；：（）《》【】…—·\"'0123456789")
+
 
 def visible_text(paths):
     text = ""
     for p in paths:
         html = p.read_text(encoding="utf-8")
-        text += re.sub(r"<[^>]+>", "", html)  # strip tags and attributes
+        html = re.sub(r"<noscript>.*?</noscript>", "", html, flags=re.S)
+        text += re.sub(r"<[^>]+>", "", html)  # 去标签与属性，保留文本
     return text
+
 
 def main():
     chars = BONUS | {c for c in visible_text(ROOT.glob("*.html")) if c.strip()}
@@ -47,7 +51,7 @@ def main():
 
     size = OUT.stat().st_size
     print(f"{len(chars)} unique chars -> {OUT.relative_to(ROOT)} ({size/1024:.1f} KB)")
-    print(f"WARNING: missing glyphs will fall back; keep this runnable." if False else "")
+
 
 if __name__ == "__main__":
     main()

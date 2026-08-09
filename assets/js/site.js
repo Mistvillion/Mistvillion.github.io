@@ -1,31 +1,64 @@
+/* 北城烟雨阁 —— 页面切换逻辑
+   进入：背景图就绪后整页模糊淡入（3s 兜底）
+   离开：全屏遮罩淡出（520ms，与 CSS 一致）→ 跳转
+   预取：导航站内链接 hover/focus 时 rel=prefetch */
+
 const root = document.documentElement;
-const backgroundVideo = document.querySelector(".background-video");
+const pageBg = document.querySelector(".page-bg");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-// Reveal is gated on the background only: the webfont is a small subset
-// loaded with font-display: swap, so the page must not wait for it.
-const videoReady = new Promise((resolve) => {
-    if (!backgroundVideo || backgroundVideo.readyState >= 2) {
+// 进入动画只等背景图：字体是小体积子集 + font-display: swap，不阻塞首屏。
+const backgroundReady = new Promise((resolve) => {
+    if (!pageBg || pageBg.readyState >= 2) {
         resolve();
         return;
     }
-
-    backgroundVideo.addEventListener("loadeddata", resolve, { once: true });
-    backgroundVideo.addEventListener("error", resolve, { once: true });
+    pageBg.addEventListener("loadeddata", resolve, { once: true });
+    pageBg.addEventListener("error", resolve, { once: true });
 });
 
 Promise.race([
-    videoReady,
-    new Promise((resolve) => setTimeout(resolve, 3000))
+    backgroundReady,
+    new Promise((resolve) => setTimeout(resolve, 3000)),
 ]).then(() => {
     requestAnimationFrame(() => {
         root.classList.add("page-ready");
     });
 });
 
+// 浏览器往返缓存（bfcache）恢复时清除离开态
 window.addEventListener("pageshow", () => {
     root.classList.remove("page-leaving");
 });
+
+/* ---------- 预取站内页面 ---------- */
+
+function prefetchPage(href) {
+    if (!href || !href.endsWith(".html")) {
+        return;
+    }
+    const destination = new URL(href, window.location.href);
+    if (destination.origin !== window.location.origin) {
+        return;
+    }
+    if (document.querySelector(`link[rel="prefetch"][href="${destination.href}"]`)) {
+        return;
+    }
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = destination.href;
+    document.head.appendChild(link);
+}
+
+document.querySelectorAll(".top-nav a[href]").forEach((link) => {
+    if (link.getAttribute("aria-current") === "page") {
+        return;
+    }
+    link.addEventListener("mouseenter", () => prefetchPage(link.href), { once: true });
+    link.addEventListener("focus", () => prefetchPage(link.href), { once: true });
+});
+
+/* ---------- 站内切换：淡出 → 跳转 ---------- */
 
 document.addEventListener("click", (event) => {
     const clickTarget = event.target instanceof Element

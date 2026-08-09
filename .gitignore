@@ -1,8 +1,6 @@
-# macOS
-.DS_Store
-
-# Python — tools/subset-font.py 的运行环境（fonttools 等）
-__pycache__/
-*.pyc
+# 本地工具与系统文件
 .venv/
 venv/
+.DS_Store
+__pycache__/
+*.pyc
