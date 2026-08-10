@@ -42,7 +42,7 @@
 
 **favicon**：两页 `<link rel="icon">` 直接引用源文件 `assets/images/favicon.jpg`。
 
-**导航栏**：右上角**玻璃胶囊导航**（半透明 + 模糊、胶囊形、内联一行）。5 栏顺序固定：
+**导航栏**：右上角**液态玻璃胶囊导航**（全透明 + 模糊、胶囊形、内联一行）。5 栏顺序固定：
 
 | 栏 | 文字 | 链接 | 行为 |
 |---|---|---|---|
@@ -56,10 +56,9 @@
 
 **字体策略**（全站统一，见"字体规范"）：全站唯一字体 PT Serif（全量 TTF）。
 
-**视觉约束**：以下三条是唯一被钉死的视觉规范，其余视觉细节由构建者决定：
-1. 玻璃胶囊导航（如上）。
-2. 模糊淡入动画（页面元素进入时 blur + 淡入）。
-3. 标题为金色 `#f6d38a`。
+**视觉约束**：以下是唯一被钉死的视觉规范，其余视觉细节由构建者决定：
+1. 液态玻璃胶囊导航（如上）。
+2. 标题为金色 `#f6d38a`。
 
 **页面结构**：两页必须保持 `main.page` 内含唯一 `section`（Home 为 `.home`，Profile 为 `.profile-view`）——站内切换通过替换该 `section` 实现（见"页面切换"），新增页面也须遵守。
 
@@ -67,7 +66,7 @@
 
 极简，只有三样：背景、导航、左下角标题块。
 
-标题块：主标题 **"Mistvillion's Home"（金色 `#f6d38a`）** 在上，**下方一行引言**（原文照抄，白色弱化）：
+标题块：主标题 **"Mistvillion's Home"（金色 `#f6d38a`）** 在上，**下方一行引言**（原文照抄）：
 
 ```
 Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.
@@ -108,17 +107,6 @@ font-family: "PT Serif", Georgia, "Times New Roman", serif;
 - 全量 TTF 体积较大（合计 ≈ 412KB），换取**任何英文文案、任何标点都无需重新子集化**。
 - 所有 `@font-face` 必须 `font-display: swap`。
 - 不得在 `assets/fonts/` 下生成或保留 woff2/子集产物。
-
-## 页面切换（"融洽"）
-
-站内切换采用「预取 + DOM 交换 + View Transitions」伪 SPA 方案：站内点击**不触发整页跳转**，背景图与字体每次访问只加载一次；首次加载的模糊淡入（背景图就绪，`loadeddata` 或 error，3 秒兜底超时）保持不变。
-
-1. 点击站内 `.html` 链接 → 取目标页 HTML（导航 hover/focus/按下时已预热并缓存解析结果）→ 在 `document.startViewTransition` 内把当前页内容区（`main > section`）替换为目标页内容，`history.pushState` 更新 URL；同步更新标题、`main` 类名与 `aria-label`、导航 `aria-current`，滚动回顶部。
-2. 不支持 View Transitions（Safari < 18、Firefox < 131 等）或 `prefers-reduced-motion` 时，降级为直接交换（无动画）。
-3. `fetch` 失败或页面结构异常时，回退为普通整页跳转。
-4. `popstate`（前进/后退）按同一交换逻辑加载目标页；若恰逢切换进行中则回退整页跳转。
-5. 跳过条件：修饰键按下（ctrl/cmd/shift/alt）、非左键、外链、`target="_blank"`、当前页、切换进行中。
-6. 支持 `prefers-reduced-motion`（关闭全部动画，直接交换）。
 
 ## 性能预算（可验收）
 

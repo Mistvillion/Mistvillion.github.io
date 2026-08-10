@@ -1,5 +1,5 @@
-/* Mistvillion's Home —— global styles
-   Font: PT Serif only (full TTF, no subsetting), used for all text. */
+/* Mistvillion's Home - global styles
+   Font: PT Serif only (full TTF, no subsetting). */
 
 @font-face {
     font-family: "PT Serif";
@@ -19,13 +19,15 @@
 
 :root {
     color-scheme: dark;
-    --text: #f6fbff;
-    --muted: rgba(246, 251, 255, 0.74);
-    --line: rgba(246, 251, 255, 0.26);
+    --ink: #f4f7fb;
+    --muted: rgba(244, 247, 251, 0.78);
     --gold: #f6d38a;
-    --bg: #02060d;
+    --nav-line: rgba(255, 255, 255, 0.32);
+    --page-base: #0d1424;
+    --shade-top: rgba(13, 20, 36, 0.2);
+    --shade-mid: rgba(13, 20, 36, 0.42);
+    --shade-deep: rgba(13, 20, 36, 0.66);
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
-    --motion-exit: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 * {
@@ -44,14 +46,15 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     font-family: "PT Serif", Georgia, "Times New Roman", serif;
-    color: var(--text);
-    background: var(--bg);
+    color: var(--ink);
+    background: var(--page-base);
 }
 
 a {
     font: inherit;
 }
 
+/* First load: the page is revealed once the background image is ready. */
 .page {
     position: relative;
     min-height: 100vh;
@@ -60,27 +63,23 @@ a {
     opacity: 0;
     visibility: hidden;
     transition:
-        opacity 760ms var(--motion-soft),
-        visibility 0s linear 760ms;
+        opacity 700ms var(--motion-soft),
+        visibility 0s linear 700ms;
 }
 
 html.page-ready .page {
     opacity: 1;
     visibility: visible;
-    transition-delay: 0s;
+    transition:
+        opacity 700ms var(--motion-soft),
+        visibility 0s;
 }
 
-.page--home {
-    align-items: flex-end;
-    padding: 96px 72px 54px;
+section:focus {
+    outline: none;
 }
 
-.page--profile {
-    align-items: stretch;
-    padding: 124px 72px 72px;
-}
-
-/* Background image + shade layer (fade in once the page is ready) */
+/* Background image and readable shade. */
 .page-bg {
     position: fixed;
     inset: 0;
@@ -88,39 +87,28 @@ html.page-ready .page {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
-    transform: scale(1.035);
+    background: var(--page-base);
+    transform: scale(1.02);
     transform-origin: center;
-    background: var(--bg);
-    transition:
-        opacity 980ms var(--motion-soft),
-        transform 1500ms var(--motion-soft);
-    will-change: opacity, transform;
+    will-change: transform;
+    transition: transform 1400ms var(--motion-soft);
+}
+
+html.page-ready .page-bg {
+    transform: scale(1);
 }
 
 .bg-shade {
     position: fixed;
     inset: 0;
     z-index: -2;
-    opacity: 0;
     background:
-        linear-gradient(90deg, rgba(2, 6, 13, 0.78), rgba(2, 6, 13, 0.26) 52%, rgba(2, 6, 13, 0.64)),
-        linear-gradient(180deg, rgba(2, 6, 13, 0.2), rgba(2, 6, 13, 0.76));
+        linear-gradient(180deg, var(--shade-top), var(--shade-mid) 48%, var(--shade-deep)),
+        linear-gradient(90deg, rgba(13, 20, 36, 0.36), rgba(13, 20, 36, 0.12) 46%, rgba(13, 20, 36, 0.3));
     pointer-events: none;
-    transition: opacity 980ms var(--motion-soft);
-    will-change: opacity;
 }
 
-html.page-ready .page-bg {
-    opacity: 1;
-    transform: scale(1);
-}
-
-html.page-ready .bg-shade {
-    opacity: 1;
-}
-
-/* Glass capsule nav, top right */
+/* Liquid glass capsule nav, top right. */
 .top-nav {
     position: fixed;
     top: 28px;
@@ -131,26 +119,15 @@ html.page-ready .bg-shade {
     gap: 4px;
     max-width: calc(100vw - 64px);
     padding: 8px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--nav-line);
     border-radius: 999px;
-    color: var(--text);
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06)),
-        rgba(4, 9, 17, 0.34);
+    color: var(--ink);
+    background: transparent;
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.32),
-        inset 0 -12px 28px rgba(255, 255, 255, 0.05),
-        0 18px 52px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    opacity: 0;
-    transform: translate3d(0, -12px, 0);
-    filter: blur(6px);
-    transition:
-        opacity 620ms var(--motion-soft),
-        transform 780ms var(--motion-soft),
-        filter 620ms var(--motion-soft);
-    will-change: opacity, transform, filter;
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 18px 48px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
 }
 
 .top-nav::before {
@@ -159,7 +136,7 @@ html.page-ready .bg-shade {
     inset: 1px 16px auto;
     height: 1px;
     border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
     pointer-events: none;
 }
 
@@ -171,224 +148,182 @@ html.page-ready .bg-shade {
     justify-content: center;
     padding: 0 15px;
     border-radius: 999px;
-    color: var(--text);
-    background: transparent;
+    color: rgba(244, 247, 251, 0.94);
     text-decoration: none;
     white-space: nowrap;
-    transition: color 180ms ease, transform 180ms ease;
+    font-size: 0.98rem;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+    transition:
+        color 180ms ease,
+        background-color 180ms ease,
+        transform 180ms ease;
 }
 
 .nav-link:hover,
-.nav-link:focus-visible,
-.nav-link[aria-current="page"] {
+.nav-link:focus-visible {
     color: var(--gold);
+    background-color: rgba(255, 255, 255, 0.12);
     outline: none;
     transform: translateY(-1px);
 }
 
+.nav-link:focus-visible {
+    box-shadow: 0 0 0 2px rgba(246, 211, 138, 0.72);
+}
+
 .nav-link[aria-current="page"] {
+    color: var(--gold);
     font-weight: 700;
 }
 
-/* Home bottom-left title block */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .top-nav {
+        background: rgba(13, 20, 36, 0.58);
+    }
+}
+
+/* Home and Profile share one full-viewport content region. */
+.home,
+.profile-view {
+    position: fixed;
+    inset: 0;
+    display: flex;
+}
+
 .home {
-    width: min(760px, 100%);
+    align-items: flex-end;
+    padding: 96px 72px 58px;
 }
 
 .title-block {
     display: grid;
-    gap: 10px;
-    opacity: 0;
-    transform: translate3d(0, 24px, 0);
-    filter: blur(8px);
-    transition:
-        opacity 720ms var(--motion-soft),
-        transform 940ms var(--motion-soft),
-        filter 720ms var(--motion-soft);
-    will-change: opacity, transform, filter;
+    gap: 12px;
 }
 
 .site-title {
-    width: fit-content;
-    max-width: 100%;
+    margin: 0;
+    color: var(--gold);
+    font-size: 3.1rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-shadow:
+        0 2px 16px rgba(246, 211, 138, 0.12),
+        0 14px 46px rgba(0, 0, 0, 0.58);
+}
+
+.site-sub {
+    max-width: 620px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.35rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+}
+
+/* Profile: centered content, no title block. */
+.profile-view {
+    align-items: center;
+    justify-content: center;
+    padding: 128px 72px 72px;
+}
+
+.profile-content {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+    text-align: left;
+}
+
+.profile-content h1 {
     margin: 0;
     color: var(--gold);
     font-size: 3rem;
     font-weight: 700;
     line-height: 1.2;
-    white-space: nowrap;
     text-shadow:
-        0 0 20px rgba(246, 211, 138, 0.18),
-        0 14px 54px rgba(0, 0, 0, 0.78);
-    user-select: none;
-}
-
-.site-sub {
-    max-width: 560px;
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.4rem;
-    line-height: 1.65;
-}
-
-/* Profile centered content */
-.profile-view {
-    width: 100%;
-    min-height: calc(100vh - 196px);
-    display: grid;
-    align-content: center;
-}
-
-.profile-content {
-    width: min(680px, 100%);
-    margin: 0 auto;
-    display: grid;
-    gap: 14px;
-    opacity: 0;
-    transform: translate3d(0, 22px, 0);
-    filter: blur(8px);
-    transition:
-        opacity 720ms var(--motion-soft),
-        transform 940ms var(--motion-soft),
-        filter 720ms var(--motion-soft);
-    will-change: opacity, transform, filter;
-}
-
-.profile-content h1 {
-    margin: 0;
-    font-size: 3rem;
-    font-weight: 700;
-    line-height: 1.25;
+        0 2px 16px rgba(246, 211, 138, 0.12),
+        0 14px 46px rgba(0, 0, 0, 0.58);
 }
 
 .profile-content p {
-    max-width: 720px;
+    max-width: 72ch;
     margin: 0;
-    color: var(--muted);
-    font-size: 1.4rem;
-    line-height: 1.9;
+    color: var(--ink);
+    font-size: 1.25rem;
+    line-height: 1.7;
+    text-wrap: pretty;
 }
 
-/* Blur fade-in once ready */
-html.page-ready .top-nav,
-html.page-ready .title-block,
-html.page-ready .profile-content {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-    filter: blur(0);
-}
-
-html.page-ready .top-nav {
-    transition-delay: 120ms;
-}
-
-html.page-ready .title-block,
-html.page-ready .profile-content {
-    transition-delay: 220ms;
-}
-
-/* View Transitions: seamless internal page swap (paired with site.js) */
-::view-transition-old(root) {
-    animation: vt-out 260ms var(--motion-exit) both;
-}
-
-::view-transition-new(root) {
-    animation: vt-in 460ms var(--motion-soft) both;
-}
-
-@keyframes vt-out {
-    to {
-        opacity: 0;
-        filter: blur(5px);
-    }
-}
-
-@keyframes vt-in {
-    from {
-        opacity: 0;
-        filter: blur(10px);
-    }
-}
-
-/* Swapped-in content is focused for assistive tech only — no visible ring */
-main > section:focus {
-    outline: none;
-}
-
-/* Responsive */
-@media (max-width: 860px) {
-    .page {
-        min-height: 100svh;
-    }
-
-    .page--home {
-        align-items: flex-end;
-        padding: 96px 24px 48px;
-    }
-
-    .page--profile {
-        align-items: stretch;
-        padding: 104px 24px 48px;
-    }
-
-    .site-title {
-        font-size: 2.5rem;
-    }
-
+/* Responsive spacing for phones. */
+@media (max-width: 640px) {
     .top-nav {
-        top: 18px;
-        right: 18px;
-        max-width: calc(100vw - 36px);
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .top-nav::-webkit-scrollbar {
-        display: none;
-    }
-}
-
-@media (max-width: 540px) {
-    .page--home {
-        padding: 96px 18px 42px;
-    }
-
-    .site-title {
-        font-size: 2.15rem;
-    }
-
-    .site-sub {
-        font-size: 1.08rem;
-    }
-
-    .top-nav {
-        left: 14px;
-        right: 14px;
-        justify-content: flex-start;
-        max-width: none;
+        top: 16px;
+        right: 16px;
+        max-width: calc(100vw - 32px);
+        gap: 2px;
+        padding: 6px;
     }
 
     .nav-link {
-        min-height: 36px;
-        padding: 0 12px;
+        min-height: 34px;
+        padding: 0 9px;
+        font-size: 0.82rem;
+    }
+
+    .home {
+        padding: 88px 24px 30px;
     }
 
     .profile-view {
-        min-height: calc(100svh - 152px);
+        padding: 88px 24px 56px;
+    }
+
+    .site-title {
+        font-size: 2.2rem;
+    }
+
+    .site-sub {
+        font-size: 1.15rem;
     }
 
     .profile-content h1 {
-        font-size: 2rem;
+        font-size: 2.4rem;
+    }
+
+    .profile-content p {
+        font-size: 1.08rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .nav-link {
+        padding: 0 7px;
+        font-size: 0.76rem;
+    }
+
+    .site-title {
+        font-size: 1.9rem;
+    }
+
+    .site-sub {
+        font-size: 1.05rem;
+    }
+
+    .profile-content p {
+        font-size: 1rem;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        transition-duration: 0.001ms !important;
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
+    html,
+    html.page-ready .page,
+    .page-bg,
+    .top-nav,
+    .nav-link {
+        transition: none !important;
+    }
+
+    html.page-ready .page-bg {
+        transform: none;
     }
 }
