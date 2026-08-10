@@ -52,25 +52,6 @@ a {
     font: inherit;
 }
 
-/* Full-screen veil when leaving the page (paired with site.js 520ms) */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    pointer-events: none;
-    opacity: 0;
-    background:
-        radial-gradient(circle at 18% 78%, rgba(246, 211, 138, 0.08), transparent 34%),
-        rgba(2, 6, 13, 0.8);
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
-    transition:
-        opacity 520ms var(--motion-exit),
-        backdrop-filter 520ms var(--motion-exit),
-        -webkit-backdrop-filter 520ms var(--motion-exit);
-}
-
 .page {
     position: relative;
     min-height: 100vh;
@@ -87,12 +68,6 @@ html.page-ready .page {
     opacity: 1;
     visibility: visible;
     transition-delay: 0s;
-}
-
-html.page-leaving body::before {
-    opacity: 1;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
 }
 
 .page--home {
@@ -143,16 +118,6 @@ html.page-ready .page-bg {
 
 html.page-ready .bg-shade {
     opacity: 1;
-}
-
-html.page-leaving .page-bg {
-    transform: scale(1.018);
-    transition-duration: 520ms;
-}
-
-html.page-leaving .bg-shade {
-    opacity: 0.72;
-    transition-duration: 520ms;
 }
 
 /* Glass capsule nav, top right */
@@ -322,24 +287,32 @@ html.page-ready .profile-content {
     transition-delay: 220ms;
 }
 
-/* Exit animation when leaving */
-html.page-leaving .top-nav {
-    opacity: 0;
-    transform: translate3d(0, -14px, 0);
-    filter: blur(5px);
-    transition-delay: 0s;
-    transition-timing-function: var(--motion-exit);
-    transition-duration: 380ms;
+/* View Transitions: seamless internal page swap (paired with site.js) */
+::view-transition-old(root) {
+    animation: vt-out 260ms var(--motion-exit) both;
 }
 
-html.page-leaving .title-block,
-html.page-leaving .profile-content {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.985);
-    filter: blur(8px);
-    transition-delay: 0s;
-    transition-timing-function: var(--motion-exit);
-    transition-duration: 440ms;
+::view-transition-new(root) {
+    animation: vt-in 460ms var(--motion-soft) both;
+}
+
+@keyframes vt-out {
+    to {
+        opacity: 0;
+        filter: blur(5px);
+    }
+}
+
+@keyframes vt-in {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+}
+
+/* Swapped-in content is focused for assistive tech only — no visible ring */
+main > section:focus {
+    outline: none;
 }
 
 /* Responsive */

@@ -61,6 +61,8 @@
 2. 模糊淡入动画（页面元素进入时 blur + 淡入）。
 3. 标题为金色 `#f6d38a`。
 
+**页面结构**：两页必须保持 `main.page` 内含唯一 `section`（Home 为 `.home`，Profile 为 `.profile-view`）——站内切换通过替换该 `section` 实现（见"页面切换"），新增页面也须遵守。
+
 ### Home（`index.html`）
 
 极简，只有三样：背景、导航、左下角标题块。
@@ -109,14 +111,14 @@ font-family: "PT Serif", Georgia, "Times New Roman", serif;
 
 ## 页面切换（"融洽"）
 
-站内页面切换沿用既定逻辑，并加上预取：
+站内切换采用「预取 + DOM 交换 + View Transitions」伪 SPA 方案：站内点击**不触发整页跳转**，背景图与字体每次访问只加载一次；首次加载的模糊淡入（背景图就绪，`loadeddata` 或 error，3 秒兜底超时）保持不变。
 
-1. 点击站内 `.html` 链接 → 全屏淡出遮罩（约 520ms）→ 跳转目标页。
-2. 新页**背景图就绪后**才做模糊淡入（`loadeddata` 或 error，3 秒兜底超时）。
-3. 跳过条件：修饰键按下（ctrl/cmd/shift/alt）、非左键、外链、`target="_blank"`、当前页、`prefers-reduced-motion`。
-4. `pageshow` 时清除离开态（兼容浏览器往返缓存）。
-5. 导航栏站内链接 hover/focus 时 `rel="prefetch"` 目标页，切换体感接近瞬开。
-6. 支持 `prefers-reduced-motion`（关闭全部动画）。
+1. 点击站内 `.html` 链接 → 取目标页 HTML（导航 hover/focus/按下时已预热并缓存解析结果）→ 在 `document.startViewTransition` 内把当前页内容区（`main > section`）替换为目标页内容，`history.pushState` 更新 URL；同步更新标题、`main` 类名与 `aria-label`、导航 `aria-current`，滚动回顶部。
+2. 不支持 View Transitions（Safari < 18、Firefox < 131 等）或 `prefers-reduced-motion` 时，降级为直接交换（无动画）。
+3. `fetch` 失败或页面结构异常时，回退为普通整页跳转。
+4. `popstate`（前进/后退）按同一交换逻辑加载目标页；若恰逢切换进行中则回退整页跳转。
+5. 跳过条件：修饰键按下（ctrl/cmd/shift/alt）、非左键、外链、`target="_blank"`、当前页、切换进行中。
+6. 支持 `prefers-reduced-motion`（关闭全部动画，直接交换）。
 
 ## 性能预算（可验收）
 
@@ -146,7 +148,7 @@ font-family: "PT Serif", Georgia, "Times New Roman", serif;
 - [ ] 导航 5 栏、顺序、链接、外链新标签行为正确；当前页有 `aria-current="page"`。
 - [ ] Home 只有背景 + 导航 + 左下角标题块；金色标题 "Mistvillion's Home" 下方为引言行。
 - [ ] Profile 无标题块，正中显示 "Profile" + 原文照抄的英文正文。
-- [ ] 站内链接全部为相对路径，逐个点击无 404；页面切换逻辑（淡出→跳转→就绪后淡入、prefetch、reduced-motion）齐全。
+- [ ] 站内链接全部为相对路径，逐个点击无 404；页面切换逻辑（预取 + DOM 交换 + View Transitions、popstate、失败回退整页跳转、reduced-motion 降级）齐全。
 - [ ] 性能预算四条全部达标。
 - [ ] 「不可变源文件」清单中的文件内容均未被修改或删除。
 
