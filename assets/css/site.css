@@ -143,6 +143,7 @@ html.page-ready .page-bg {
 .nav-link {
     position: relative;
     min-height: 38px;
+    min-width: 80px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -266,6 +267,7 @@ html.page-ready .page-bg {
 
     .nav-link {
         min-height: 34px;
+        min-width: 60px;
         padding: 0 9px;
         font-size: 0.82rem;
     }
@@ -296,8 +298,14 @@ html.page-ready .page-bg {
 }
 
 @media (max-width: 380px) {
+    .top-nav {
+        gap: 0;
+        padding: 4px;
+    }
+
     .nav-link {
-        padding: 0 7px;
+        min-width: 52px;
+        padding: 0 5px;
         font-size: 0.76rem;
     }
 

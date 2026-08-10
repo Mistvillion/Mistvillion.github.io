@@ -7,6 +7,7 @@
     "use strict";
 
     const root = document.documentElement;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pageBg = document.querySelector(".page-bg");
 
     /* ---------- First-load reveal ---------- */
@@ -111,6 +112,21 @@
         window.scrollTo(0, 0);
         freshSection.tabIndex = -1;
         freshSection.focus({ preventScroll: true });
+
+        if (!prefersReducedMotion.matches && typeof freshSection.animate === "function") {
+            const animation = freshSection.animate(
+                [
+                    { opacity: 0, transform: "translateY(6px)" },
+                    { opacity: 1, transform: "translateY(0)" }
+                ],
+                {
+                    duration: 180,
+                    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                    fill: "both"
+                }
+            );
+            animation.onfinish = () => animation.cancel();
+        }
     }
 
     /* ---------- Navigation ---------- */
