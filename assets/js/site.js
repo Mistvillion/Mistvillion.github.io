@@ -80,6 +80,27 @@
 
     /* ---------- DOM swap ---------- */
 
+    function sortNoteCards(scope) {
+        const list = scope.querySelector(".note-list");
+        if (!list) {
+            return;
+        }
+
+        const cards = Array.from(list.querySelectorAll(":scope > .note-card"));
+        cards.sort((cardA, cardB) => {
+            const titleAElement = cardA.querySelector(".note-card-title");
+            const titleBElement = cardB.querySelector(".note-card-title");
+            const titleA = titleAElement ? titleAElement.textContent.trim() : "";
+            const titleB = titleBElement ? titleBElement.textContent.trim() : "";
+            return titleA.localeCompare(titleB, undefined, {
+                sensitivity: "base",
+                numeric: true
+            });
+        });
+
+        cards.forEach((card) => list.appendChild(card));
+    }
+
     function applyDocument(doc, url) {
         const currentMain = document.querySelector("main.page");
         const currentSection = currentMain && currentMain.querySelector(":scope > section");
@@ -92,6 +113,7 @@
 
         const freshSection = newSection.cloneNode(true);
         currentSection.replaceWith(freshSection);
+        sortNoteCards(freshSection);
         currentMain.className = newMain.className;
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
         document.title = doc.title;
@@ -232,4 +254,6 @@
         link.addEventListener("focus", () => warmPage(link.href), { once: true });
         link.addEventListener("pointerdown", () => warmPage(link.href), { once: true });
     });
+
+    sortNoteCards(document);
 })();

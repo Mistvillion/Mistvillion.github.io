@@ -183,9 +183,10 @@ html.page-ready .page-bg {
     }
 }
 
-/* Home and Profile share one full-viewport content region. */
+/* Home, Profile and Notes share one full-viewport content region. */
 .home,
-.profile-view {
+.profile-view,
+.notes-view {
     position: fixed;
     inset: 0;
     display: flex;
@@ -221,21 +222,25 @@ html.page-ready .page-bg {
     text-wrap: pretty;
 }
 
-/* Profile: centered content, no title block. */
-.profile-view {
+/* Profile and Notes: centered content, no title block. */
+.profile-view,
+.notes-view {
     align-items: center;
     justify-content: center;
     padding: 128px 72px 72px;
 }
 
-.profile-content {
+.profile-content,
+.notes-content {
+    width: min(720px, 100%);
     display: grid;
     gap: 16px;
     justify-items: start;
     text-align: left;
 }
 
-.profile-content h1 {
+.profile-content h1,
+.notes-content h1 {
     margin: 0;
     color: var(--gold);
     font-size: 3rem;
@@ -246,13 +251,65 @@ html.page-ready .page-bg {
         0 14px 46px rgba(0, 0, 0, 0.58);
 }
 
-.profile-content p {
+.profile-content p,
+.notes-intro {
     max-width: 72ch;
     margin: 0;
     color: var(--ink);
     font-size: 1.25rem;
     line-height: 1.7;
     text-wrap: pretty;
+}
+
+/* Notes: vertically stacked liquid glass note cards. */
+.note-list {
+    width: 100%;
+    display: grid;
+    gap: 18px;
+    margin-top: 12px;
+}
+
+.note-card {
+    width: 100%;
+    display: grid;
+    gap: 6px;
+    padding: 20px 28px;
+    border: 1px solid var(--nav-line);
+    border-radius: 999px;
+    color: var(--ink);
+    text-decoration: none;
+    background: transparent;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 18px 48px rgba(0, 0, 0, 0.22);
+    transition:
+        color 180ms ease,
+        transform 180ms ease;
+}
+
+.note-card-title {
+    color: var(--gold);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.note-card-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.note-card:hover,
+.note-card:focus-visible {
+    color: var(--gold);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.note-card:focus-visible {
+    box-shadow: 0 0 0 2px rgba(246, 211, 138, 0.72);
 }
 
 /* Responsive spacing for phones. */
@@ -276,7 +333,8 @@ html.page-ready .page-bg {
         padding: 88px 24px 30px;
     }
 
-    .profile-view {
+    .profile-view,
+    .notes-view {
         padding: 88px 24px 56px;
     }
 
@@ -288,12 +346,26 @@ html.page-ready .page-bg {
         font-size: 1.15rem;
     }
 
-    .profile-content h1 {
+    .profile-content h1,
+    .notes-content h1 {
         font-size: 2.4rem;
     }
 
-    .profile-content p {
+    .profile-content p,
+    .notes-intro {
         font-size: 1.08rem;
+    }
+
+    .note-card {
+        padding: 16px 20px;
+    }
+
+    .note-card-title {
+        font-size: 1.1rem;
+    }
+
+    .note-card-desc {
+        font-size: 0.95rem;
     }
 }
 
@@ -317,8 +389,13 @@ html.page-ready .page-bg {
         font-size: 1.05rem;
     }
 
-    .profile-content p {
+    .profile-content p,
+    .notes-intro {
         font-size: 1rem;
+    }
+
+    .note-card {
+        padding: 14px 16px;
     }
 }
 
@@ -327,7 +404,8 @@ html.page-ready .page-bg {
     html.page-ready .page,
     .page-bg,
     .top-nav,
-    .nav-link {
+    .nav-link,
+    .note-card {
         transition: none !important;
     }
 
