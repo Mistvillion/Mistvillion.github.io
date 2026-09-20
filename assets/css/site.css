@@ -24,9 +24,9 @@
     --gold: #f6d38a;
     --nav-line: rgba(255, 255, 255, 0.32);
     --page-base: #0d1424;
-    --shade-top: rgba(13, 20, 36, 0.2);
-    --shade-mid: rgba(13, 20, 36, 0.42);
-    --shade-deep: rgba(13, 20, 36, 0.66);
+    --shade-top: rgba(13, 20, 36, 0.08);
+    --shade-mid: rgba(13, 20, 36, 0.18);
+    --shade-deep: rgba(13, 20, 36, 0.3);
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
