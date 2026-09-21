@@ -102,10 +102,38 @@ html.page-ready .page-bg {
     position: fixed;
     inset: 0;
     z-index: -2;
-    background:
-        linear-gradient(180deg, var(--shade-top), var(--shade-mid) 48%, var(--shade-deep)),
-        linear-gradient(90deg, rgba(13, 20, 36, 0.36), rgba(13, 20, 36, 0.12) 46%, rgba(13, 20, 36, 0.3));
     pointer-events: none;
+    background:
+    /* Upper central aurora streak */
+    radial-gradient(
+        ellipse 7% 18% at 60% 17%,
+        rgba(13, 20, 36, 0.48) 0%,
+        rgba(13, 20, 36, 0.28) 50%,
+        transparent 82%
+    ),
+
+    /* Right aurora streak */
+    radial-gradient(
+        ellipse 11% 12% at 75% 35%,
+        rgba(13, 20, 36, 0.48) 0%,
+        rgba(13, 20, 36, 0.26) 52%,
+        transparent 84%
+    ),
+
+    /* Upper aurora arc */
+    radial-gradient(
+        ellipse 48% 38% at 78% 8%,
+        rgba(13, 20, 36, 0.52),
+        transparent 78%
+    ),
+
+    /* Central aurora tail */
+    radial-gradient(
+        ellipse 25% 36% at 59% 46%,
+        rgba(13, 20, 36, 0.58) 0%,
+        rgba(13, 20, 36, 0.36) 48%,
+        transparent 82%
+    );
 }
 
 /* Liquid glass capsule nav, top right. */
