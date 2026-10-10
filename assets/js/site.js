@@ -21,6 +21,51 @@
         }
     }
 
+    /* ---------- Quote reveal ---------- */
+
+    /* Split the Home quote into per-character spans (CSS staggers them in).
+       Screen readers get the untouched sentence from a hidden copy. */
+    function typesetQuote(root) {
+        if (prefersReducedMotion.matches) {
+            return;
+        }
+        const quote = root.querySelector(".site-sub");
+        if (!quote || quote.classList.contains("is-typeset")) {
+            return;
+        }
+
+        const text = quote.textContent.trim().replace(/\s+/g, " ");
+        const label = document.createElement("span");
+        label.className = "visually-hidden";
+        label.textContent = text;
+
+        const glyphs = document.createElement("span");
+        glyphs.setAttribute("aria-hidden", "true");
+        let index = 0;
+        text.split(" ").forEach((word, wordIndex) => {
+            if (wordIndex > 0) {
+                glyphs.append(" ");
+                index += 1;
+            }
+            const wordSpan = document.createElement("span");
+            wordSpan.className = "quote-word";
+            for (const char of word) {
+                const charSpan = document.createElement("span");
+                charSpan.className = "quote-char";
+                charSpan.style.setProperty("--i", index);
+                charSpan.textContent = char;
+                wordSpan.append(charSpan);
+                index += 1;
+            }
+            glyphs.append(wordSpan);
+        });
+
+        quote.replaceChildren(label, glyphs);
+        quote.classList.add("is-typeset");
+    }
+
+    typesetQuote(document);
+
     /* ---------- Prefetch and cache internal pages ---------- */
 
     const pageCache = new Map();
@@ -71,6 +116,7 @@
         }
 
         const freshSection = document.importNode(newSection, true);
+        typesetQuote(freshSection);
         currentSection.replaceWith(freshSection);
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
         document.title = doc.title;
