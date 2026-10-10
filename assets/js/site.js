@@ -1,30 +1,25 @@
 /* Mistvillion's Home - page logic
-   First load: reveal once the background is ready (2.5s fallback).
-   Internal links: prefetch + synchronous DOM swap.
+   First load: content shows at once; the background fades in when loaded.
+   Internal links: prefetch + DOM swap inside a View Transition.
    Failure: full-page navigation. */
 
 (function () {
     "use strict";
 
-    const root = document.documentElement;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    /* ---------- Background fade-in ---------- */
+
     const pageBg = document.querySelector(".page-bg");
-
-    /* ---------- First-load reveal ---------- */
-
-    const backgroundReady = new Promise((resolve) => {
-        if (!pageBg || pageBg.complete) {
-            resolve();
-            return;
+    if (pageBg) {
+        const markLoaded = () => pageBg.classList.add("is-loaded");
+        if (pageBg.complete) {
+            markLoaded();
+        } else {
+            pageBg.addEventListener("load", markLoaded, { once: true });
+            pageBg.addEventListener("error", markLoaded, { once: true });
         }
-        pageBg.addEventListener("load", resolve, { once: true });
-        pageBg.addEventListener("error", resolve, { once: true });
-    });
-
-    const revealFallback = new Promise((resolve) => setTimeout(resolve, 2500));
-    Promise.race([backgroundReady, revealFallback]).then(() => {
-        requestAnimationFrame(() => root.classList.add("page-ready"));
-    });
+    }
 
     /* ---------- Prefetch and cache internal pages ---------- */
 
@@ -34,46 +29,31 @@
         return pathname.endsWith("/") ? pathname + "index.html" : pathname;
     }
 
-    function cacheKey(href) {
-        const url = new URL(href, window.location.href);
-        return url.origin + canonicalPath(url.pathname);
+    function isCurrentPath(url) {
+        return canonicalPath(url.pathname) === canonicalPath(window.location.pathname);
     }
 
-    function warmPage(href) {
-        const url = new URL(href, window.location.href);
-        if (
-            url.origin !== window.location.origin ||
-            !url.pathname.endsWith(".html") ||
-            canonicalPath(url.pathname) === canonicalPath(window.location.pathname)
-        ) {
-            return;
-        }
-
-        const key = cacheKey(href);
-        if (pageCache.has(key)) {
-            return;
-        }
-
-        const promise = fetch(href, { credentials: "same-origin" })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("HTTP " + response.status);
-                }
-                return response.text();
-            })
-            .then((html) => new DOMParser().parseFromString(html, "text/html"))
-            .catch((error) => {
-                pageCache.delete(key);
-                throw error;
-            });
-
-        pageCache.set(key, promise);
+    function isInternalPage(url) {
+        return url.origin === window.location.origin && url.pathname.endsWith(".html");
     }
 
     function loadPage(href) {
-        const key = cacheKey(href);
+        const url = new URL(href, window.location.href);
+        const key = canonicalPath(url.pathname);
         if (!pageCache.has(key)) {
-            warmPage(href);
+            const promise = fetch(url.href, { credentials: "same-origin" })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("HTTP " + response.status);
+                    }
+                    return response.text();
+                })
+                .then((html) => new DOMParser().parseFromString(html, "text/html"))
+                .catch((error) => {
+                    pageCache.delete(key);
+                    throw error;
+                });
+            pageCache.set(key, promise);
         }
         return pageCache.get(key);
     }
@@ -83,22 +63,21 @@
     function applyDocument(doc, url) {
         const currentMain = document.querySelector("main.page");
         const currentSection = currentMain && currentMain.querySelector(":scope > section");
-        const newMain = doc && doc.querySelector("main.page");
+        const newMain = doc.querySelector("main.page");
         const newSection = newMain && newMain.querySelector(":scope > section");
 
-        if (!currentMain || !currentSection || !newMain || !newSection) {
+        if (!currentSection || !newSection) {
             throw new Error("unexpected page structure");
         }
 
-        const freshSection = newSection.cloneNode(true);
+        const freshSection = document.importNode(newSection, true);
         currentSection.replaceWith(freshSection);
-        currentMain.className = newMain.className;
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
         document.title = doc.title;
 
         const targetPath = canonicalPath(new URL(url, window.location.href).pathname);
         document.querySelectorAll(".top-nav a[href]").forEach((link) => {
-            const linkUrl = new URL(link.href, window.location.href);
+            const linkUrl = new URL(link.href);
             if (linkUrl.origin !== window.location.origin) {
                 return;
             }
@@ -112,21 +91,21 @@
         window.scrollTo(0, 0);
         freshSection.tabIndex = -1;
         freshSection.focus({ preventScroll: true });
+        return freshSection;
+    }
 
-        if (!prefersReducedMotion.matches && typeof freshSection.animate === "function") {
-            const animation = freshSection.animate(
-                [
-                    { opacity: 0, transform: "translateY(6px)" },
-                    { opacity: 1, transform: "translateY(0)" }
-                ],
-                {
-                    duration: 180,
-                    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-                    fill: "both"
-                }
-            );
-            animation.onfinish = () => animation.cancel();
+    /* Fallback for browsers without View Transitions. */
+    function fadeIn(section) {
+        if (typeof section.animate !== "function") {
+            return;
         }
+        section.animate(
+            [
+                { opacity: 0, transform: "translateY(6px)" },
+                { opacity: 1, transform: "none" }
+            ],
+            { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+        );
     }
 
     /* ---------- Navigation ---------- */
@@ -140,81 +119,79 @@
         navigating = true;
 
         let doc;
+        const swap = () => {
+            const section = applyDocument(doc, url);
+            if (updateHistory) {
+                history.pushState(null, "", url);
+            }
+            return section;
+        };
+
         try {
             doc = await loadPage(url);
-            if (!doc || !doc.querySelector("main.page > section")) {
-                throw new Error("unexpected page structure");
+            if (prefersReducedMotion.matches) {
+                swap();
+            } else if (typeof document.startViewTransition === "function") {
+                await document.startViewTransition(swap).updateCallbackDone;
+            } else {
+                fadeIn(swap());
             }
         } catch (error) {
-            navigating = false;
             window.location.href = url;
-            return;
+        } finally {
+            navigating = false;
         }
-
-        applyDocument(doc, url);
-        if (updateHistory) {
-            history.pushState(null, "", url);
-        }
-
-        navigating = false;
     }
 
     /* ---------- Click handling ---------- */
 
     document.addEventListener("click", (event) => {
-        if (event.defaultPrevented || event.button !== 0) {
+        if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
+        ) {
             return;
         }
 
-        const node = event.target instanceof Element ? event.target : null;
-        const link = node && node.closest ? node.closest("a[href]") : null;
-        if (!link || link.target || link.getAttribute("aria-current") === "page") {
-            return;
-        }
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+        if (!link || link.target) {
             return;
         }
 
-        const destination = new URL(link.href, window.location.href);
-        const isInternalHtml =
-            destination.origin === window.location.origin &&
-            destination.pathname.endsWith(".html");
-        const isCurrentPage =
-            canonicalPath(destination.pathname) === canonicalPath(window.location.pathname) &&
-            destination.search === window.location.search &&
-            destination.hash === window.location.hash;
-
-        if (!isInternalHtml || isCurrentPage) {
+        const destination = new URL(link.href);
+        if (!isInternalPage(destination)) {
             return;
         }
 
         event.preventDefault();
-        if (navigating) {
-            return;
+        if (!isCurrentPath(destination)) {
+            navigateTo(destination.href, true);
         }
-        navigateTo(destination.href, true);
     });
 
     /* ---------- Back and forward ---------- */
 
     window.addEventListener("popstate", () => {
-        const url = window.location.href;
         if (navigating) {
-            window.location.href = url;
+            window.location.reload();
             return;
         }
-        navigateTo(url, false);
+        navigateTo(window.location.href, false);
     });
 
     if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
     }
 
-    /* ---------- Warm the other page as early as possible ---------- */
+    /* ---------- Warm the other pages once the browser is idle ---------- */
 
     function warmInternalPages() {
         document.querySelectorAll(".top-nav a[href]").forEach((link) => {
-            warmPage(link.href);
+            const url = new URL(link.href);
+            if (isInternalPage(url) && !isCurrentPath(url)) {
+                loadPage(url.href).catch(() => {});
+            }
         });
     }
 
@@ -223,13 +200,4 @@
     } else {
         setTimeout(warmInternalPages, 400);
     }
-
-    document.querySelectorAll(".top-nav a[href]").forEach((link) => {
-        if (link.getAttribute("aria-current") === "page") {
-            return;
-        }
-        link.addEventListener("mouseenter", () => warmPage(link.href), { once: true });
-        link.addEventListener("focus", () => warmPage(link.href), { once: true });
-        link.addEventListener("pointerdown", () => warmPage(link.href), { once: true });
-    });
 })();

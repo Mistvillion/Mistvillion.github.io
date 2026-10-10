@@ -24,9 +24,6 @@
     --gold: #f6d38a;
     --nav-line: rgba(255, 255, 255, 0.32);
     --page-base: #0d1424;
-    --shade-top: rgba(13, 20, 36, 0.08);
-    --shade-mid: rgba(13, 20, 36, 0.18);
-    --shade-deep: rgba(13, 20, 36, 0.3);
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -34,17 +31,9 @@
     box-sizing: border-box;
 }
 
-html,
 body {
-    width: 100%;
-    min-height: 100%;
     margin: 0;
-}
-
-body {
-    min-height: 100vh;
     overflow-x: hidden;
-    overflow-y: auto;
     font-family: "PT Serif", Georgia, "Times New Roman", serif;
     color: var(--ink);
     background: var(--page-base);
@@ -54,32 +43,21 @@ a {
     font: inherit;
 }
 
-/* First load: the page is revealed once the background image is ready. */
+/* Content is visible immediately; only the background fades in once loaded. */
 .page {
     position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
+    flex-direction: column;
     isolation: isolate;
-    opacity: 0;
-    visibility: hidden;
-    transition:
-        opacity 700ms var(--motion-soft),
-        visibility 0s linear 700ms;
-}
-
-html.page-ready .page {
-    opacity: 1;
-    visibility: visible;
-    transition:
-        opacity 700ms var(--motion-soft),
-        visibility 0s;
 }
 
 section:focus {
     outline: none;
 }
 
-/* Background image and readable shade. */
+/* Background image. */
 .page-bg {
     position: fixed;
     inset: 0;
@@ -87,53 +65,25 @@ section:focus {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    background: var(--page-base);
+    transition:
+        opacity 700ms var(--motion-soft),
+        transform 1400ms var(--motion-soft);
+}
+
+/* Without JS the background simply shows; with JS it waits for load. */
+html.js .page-bg:not(.is-loaded) {
+    opacity: 0;
     transform: scale(1.02);
-    transform-origin: center;
-    will-change: transform;
-    transition: transform 1400ms var(--motion-soft);
 }
 
-html.page-ready .page-bg {
-    transform: scale(1);
-}
-
-.bg-shade {
+/* Uniform dark shade over the whole background. */
+.page::before {
+    content: "";
     position: fixed;
     inset: 0;
     z-index: -2;
     pointer-events: none;
-    background:
-    /* Upper central aurora streak */
-    radial-gradient(
-        ellipse 7% 18% at 60% 17%,
-        rgba(13, 20, 36, 0.48) 0%,
-        rgba(13, 20, 36, 0.28) 50%,
-        transparent 82%
-    ),
-
-    /* Right aurora streak */
-    radial-gradient(
-        ellipse 11% 12% at 75% 35%,
-        rgba(13, 20, 36, 0.48) 0%,
-        rgba(13, 20, 36, 0.26) 52%,
-        transparent 84%
-    ),
-
-    /* Upper aurora arc */
-    radial-gradient(
-        ellipse 48% 38% at 78% 8%,
-        rgba(13, 20, 36, 0.52),
-        transparent 78%
-    ),
-
-    /* Central aurora tail */
-    radial-gradient(
-        ellipse 25% 36% at 59% 46%,
-        rgba(13, 20, 36, 0.58) 0%,
-        rgba(13, 20, 36, 0.36) 48%,
-        transparent 82%
-    );
+    background: rgba(13, 20, 36, 0.4);
 }
 
 /* Liquid glass capsule nav, top right. */
@@ -151,11 +101,7 @@ html.page-ready .page-bg {
     border-radius: 999px;
     color: var(--ink);
     background: transparent;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        0 18px 48px rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(22px) saturate(150%);
-    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .top-nav::before {
@@ -180,7 +126,7 @@ html.page-ready .page-bg {
     color: rgba(244, 247, 251, 0.94);
     text-decoration: none;
     white-space: nowrap;
-    font-size: 0.98rem;
+    font-size: 1.06rem;
     text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
     transition:
         color 180ms ease,
@@ -205,17 +151,10 @@ html.page-ready .page-bg {
     font-weight: 700;
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .top-nav {
-        background: rgba(13, 20, 36, 0.58);
-    }
-}
-
-/* Home and Profile share one full-viewport content region. */
+/* Home and Profile share one full-height content region that scrolls if needed. */
 .home,
 .profile-view {
-    position: fixed;
-    inset: 0;
+    flex: 1;
     display: flex;
 }
 
@@ -232,7 +171,7 @@ html.page-ready .page-bg {
 .site-title {
     margin: 0;
     color: var(--gold);
-    font-size: 3.1rem;
+    font-size: 3.4rem;
     font-weight: 700;
     line-height: 1.15;
     text-shadow:
@@ -241,11 +180,12 @@ html.page-ready .page-bg {
 }
 
 .site-sub {
-    max-width: 620px;
+    max-width: 680px;
     margin: 0;
     color: var(--muted);
-    font-size: 1.35rem;
+    font-size: 1.48rem;
     line-height: 1.65;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
     text-wrap: pretty;
 }
 
@@ -257,7 +197,7 @@ html.page-ready .page-bg {
 }
 
 .profile-content {
-    width: min(720px, 100%);
+    width: min(780px, 100%);
     display: grid;
     gap: 16px;
     justify-items: start;
@@ -267,7 +207,7 @@ html.page-ready .page-bg {
 .profile-content h1 {
     margin: 0;
     color: var(--gold);
-    font-size: 3rem;
+    font-size: 3.3rem;
     font-weight: 700;
     line-height: 1.2;
     text-shadow:
@@ -279,8 +219,9 @@ html.page-ready .page-bg {
     max-width: 72ch;
     margin: 0;
     color: var(--ink);
-    font-size: 1.25rem;
+    font-size: 1.36rem;
     line-height: 1.7;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
     text-wrap: pretty;
 }
 
@@ -298,7 +239,7 @@ html.page-ready .page-bg {
         min-height: 34px;
         min-width: 60px;
         padding: 0 9px;
-        font-size: 0.82rem;
+        font-size: 0.9rem;
     }
 
     .home {
@@ -310,19 +251,19 @@ html.page-ready .page-bg {
     }
 
     .site-title {
-        font-size: 2.2rem;
+        font-size: 2.45rem;
     }
 
     .site-sub {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
     }
 
     .profile-content h1 {
-        font-size: 2.4rem;
+        font-size: 2.65rem;
     }
 
     .profile-content p {
-        font-size: 1.08rem;
+        font-size: 1.18rem;
     }
 }
 
@@ -335,32 +276,37 @@ html.page-ready .page-bg {
     .nav-link {
         min-width: 52px;
         padding: 0 5px;
-        font-size: 0.76rem;
+        font-size: 0.82rem;
     }
 
     .site-title {
-        font-size: 1.9rem;
+        font-size: 2.1rem;
     }
 
     .site-sub {
-        font-size: 1.05rem;
+        font-size: 1.14rem;
     }
 
     .profile-content p {
-        font-size: 1rem;
+        font-size: 1.08rem;
     }
 }
 
+/* Internal page swaps: the unchanged background and nav make the root
+   cross-fade read as a section-only transition. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: var(--motion-soft);
+}
+
 @media (prefers-reduced-motion: reduce) {
-    html,
-    html.page-ready .page,
     .page-bg,
-    .top-nav,
     .nav-link {
         transition: none !important;
     }
 
-    html.page-ready .page-bg {
+    html.js .page-bg:not(.is-loaded) {
         transform: none;
     }
 }
