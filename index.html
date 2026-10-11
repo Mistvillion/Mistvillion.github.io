@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mistvillion's Home</title>
-    <script>document.documentElement.classList.add("js");</script>
+    <script>document.documentElement.classList.add("js");try{if(localStorage.getItem("lang")==="zh-CN"){document.documentElement.lang="zh-CN";}}catch(e){}</script>
     <link rel="icon" href="assets/images/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.jpg">
     <link rel="preload" href="assets/fonts/PTSerif-Regular.ttf" as="font" type="font/ttf" crossorigin>
@@ -12,20 +12,36 @@
     <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
-    <main class="page" aria-label="Mistvillion's Home">
-        <img class="page-bg" src="assets/images/background1.webp" alt="" width="2560" height="1440" fetchpriority="high" decoding="async">
-
+    <main class="page" aria-label="Mistvillion's Home" data-title="home.title">
         <nav class="top-nav" aria-label="Site navigation">
-            <a class="nav-link" href="index.html" aria-current="page">Home</a>
-            <a class="nav-link" href="profile.html">Profile</a>
-            <a class="nav-link" href="https://blog.sparklerain.top/" target="_blank" rel="noopener noreferrer">Blogs</a>
-            <a class="nav-link" href="https://github.com/Mistvillion" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <div class="nav-links">
+                <a class="nav-link" href="index.html" aria-current="page" data-i18n="nav.home">Home</a>
+                <a class="nav-link" href="blogs.html" data-i18n="nav.blogs">Blogs</a>
+                <a class="nav-link" href="https://github.com/Mistvillion" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+            <button class="lang-toggle" type="button" data-lang-toggle lang="zh-CN">中文</button>
         </nav>
 
         <section class="home" aria-labelledby="site-title">
+            <img class="page-bg" src="assets/images/background1.webp" alt="" width="2560" height="1440" fetchpriority="high" decoding="async">
             <div class="title-block">
-                <h1 class="site-title" id="site-title">Mistvillion's Home</h1>
-                <p class="site-sub">Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.</p>
+                <h1 class="site-title" id="site-title" data-i18n="home.title">Mistvillion's Home</h1>
+                <p class="site-sub" data-i18n="quote">Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.</p>
+            </div>
+        </section>
+
+        <section class="content-section profile-view" aria-labelledby="profile-title">
+            <div class="profile-content">
+                <h2 class="section-title" id="profile-title" data-i18n="profile">Profile</h2>
+                <div class="profile-text" data-profile><p>This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction. This is a placeholder introduction.</p></div>
+            </div>
+        </section>
+
+        <section class="content-section latest-view" aria-labelledby="latest-title">
+            <div class="section-inner">
+                <h2 class="section-title" id="latest-title" data-i18n="latest">Latest writing</h2>
+                <ol class="post-list" data-post-list data-limit="2"></ol>
+                <a class="more-link" href="blogs.html" data-i18n="allWriting">All writing &rarr;</a>
             </div>
         </section>
     </main>

@@ -1,7 +1,9 @@
 /* Mistvillion's Home - page logic
    First load: content shows at once; the background fades in when loaded.
    Internal links: prefetch + DOM swap inside a View Transition.
-   Failure: full-page navigation. */
+   Failure: full-page navigation.
+   Language: English or Chinese, remembered in localStorage.
+   Blog data: blogs/index.json lists posts; posts and the profile are Markdown rendered here. */
 
 (function () {
     "use strict";
@@ -10,8 +12,11 @@
 
     /* ---------- Background fade-in ---------- */
 
-    const pageBg = document.querySelector(".page-bg");
-    if (pageBg) {
+    function fadeInBackground(root) {
+        const pageBg = root.querySelector(".page-bg");
+        if (!pageBg) {
+            return;
+        }
         const markLoaded = () => pageBg.classList.add("is-loaded");
         if (pageBg.complete) {
             markLoaded();
@@ -21,50 +26,500 @@
         }
     }
 
-    /* ---------- Quote reveal ---------- */
+    /* ---------- Language ---------- */
 
-    /* Split the Home quote into per-character spans (CSS staggers them in).
-       Screen readers get the untouched sentence from a hidden copy. */
-    function typesetQuote(root) {
-        if (prefersReducedMotion.matches) {
-            return;
+    const TEXT = {
+        "en": {
+            "nav.home": "Home",
+            "nav.blogs": "Blogs",
+            "toggle": "中文",
+            "home.title": "Mistvillion's Home",
+            "blogs.title": "Mistvillion's Blogs",
+            "quote": "Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.",
+            "profile": "Profile",
+            "latest": "Latest writing",
+            "allWriting": "All writing →",
+            "writing": "Writing",
+            "all": "All",
+            "filter": "Filter by category",
+            "back": "← All writing",
+            "minRead": " min read",
+            "empty": "Nothing here yet.",
+            "listFailed": "Posts could not be loaded.",
+            "postFailed": "The post could not be loaded.",
+            "postMissing": "This post does not exist."
+        },
+        "zh-CN": {
+            "nav.home": "首页",
+            "nav.blogs": "博客",
+            "toggle": "en",
+            "home.title": "北城烟雨阁的主页",
+            "blogs.title": "北城烟雨阁的博客",
+            "quote": "此情可待成追忆，只是当时已惘然。",
+            "profile": "简介",
+            "latest": "最新文章",
+            "allWriting": "全部文章 →",
+            "writing": "文章",
+            "all": "全部",
+            "filter": "按分类筛选",
+            "back": "← 全部文章",
+            "minRead": " 分钟阅读",
+            "empty": "暂无文章。",
+            "listFailed": "文章列表加载失败。",
+            "postFailed": "文章加载失败。",
+            "postMissing": "文章不存在。"
         }
-        const quote = root.querySelector(".site-sub");
-        if (!quote || quote.classList.contains("is-typeset")) {
-            return;
+    };
+
+    const PROFILE_FILES = { "en": "blogs/profile-en.md", "zh-CN": "blogs/profile-zh.md" };
+
+    function readStoredLang() {
+        try {
+            return localStorage.getItem("lang") === "zh-CN" ? "zh-CN" : "en";
+        } catch (error) {
+            return "en";
         }
-
-        const text = quote.textContent.trim().replace(/\s+/g, " ");
-        const label = document.createElement("span");
-        label.className = "visually-hidden";
-        label.textContent = text;
-
-        const glyphs = document.createElement("span");
-        glyphs.setAttribute("aria-hidden", "true");
-        let index = 0;
-        text.split(" ").forEach((word, wordIndex) => {
-            if (wordIndex > 0) {
-                glyphs.append(" ");
-                index += 1;
-            }
-            const wordSpan = document.createElement("span");
-            wordSpan.className = "quote-word";
-            for (const char of word) {
-                const charSpan = document.createElement("span");
-                charSpan.className = "quote-char";
-                charSpan.style.setProperty("--i", index);
-                charSpan.textContent = char;
-                wordSpan.append(charSpan);
-                index += 1;
-            }
-            glyphs.append(wordSpan);
-        });
-
-        quote.replaceChildren(label, glyphs);
-        quote.classList.add("is-typeset");
     }
 
-    typesetQuote(document);
+    let lang = readStoredLang();
+
+    function t(key) {
+        return TEXT[lang][key];
+    }
+
+    /* Swap every labelled string, the toggle and the tab title to the current language. */
+    function applyLanguage(root) {
+        document.documentElement.lang = lang;
+        root.querySelectorAll("[data-i18n]").forEach((node) => {
+            node.textContent = t(node.dataset.i18n);
+        });
+        root.querySelectorAll("[data-i18n-label]").forEach((node) => {
+            node.setAttribute("aria-label", t(node.dataset.i18nLabel));
+        });
+
+        const toggle = document.querySelector("[data-lang-toggle]");
+        if (toggle) {
+            toggle.textContent = t("toggle");
+            toggle.lang = lang === "en" ? "zh-CN" : "en";
+        }
+
+        const main = document.querySelector("main.page");
+        if (main && main.dataset.title) {
+            document.title = t(main.dataset.title);
+            main.setAttribute("aria-label", t(main.dataset.title));
+        }
+    }
+
+    /* ---------- Blog data ---------- */
+
+    const CJK = /[\u3400-\u9fff\uf900-\ufaff]/;
+    let postIndex = null;
+    const textCache = new Map();
+
+    function fetchText(path) {
+        if (!textCache.has(path)) {
+            const promise = fetch(path, { credentials: "same-origin" })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("HTTP " + response.status);
+                    }
+                    return response.text();
+                })
+                .catch((error) => {
+                    textCache.delete(path);
+                    throw error;
+                });
+            textCache.set(path, promise);
+        }
+        return textCache.get(path);
+    }
+
+    function loadPostIndex() {
+        if (!postIndex) {
+            postIndex = fetchText("blogs/index.json")
+                .then((text) => JSON.parse(text))
+                .then((posts) => posts.slice().sort((a, b) => (a.published < b.published ? 1 : -1)))
+                .catch((error) => {
+                    postIndex = null;
+                    throw error;
+                });
+        }
+        return postIndex;
+    }
+
+    /* The post in the current language, falling back to whichever version exists. */
+    function localized(post) {
+        const version = post[lang] || post.en || post["zh-CN"];
+        return Object.assign({ slug: post.slug, published: post.published }, version);
+    }
+
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) {
+            node.className = className;
+        }
+        if (text) {
+            node.textContent = text;
+            if (CJK.test(text) !== (lang === "zh-CN")) {
+                node.lang = CJK.test(text) ? "zh-CN" : "en";
+            }
+        }
+        return node;
+    }
+
+    function postMeta(post, withMinutes) {
+        const meta = el("div", "post-meta");
+        const time = el("time", "", post.published);
+        time.dateTime = post.published;
+        meta.append(time);
+        if (post.category) {
+            meta.append(el("span", "tag", post.category));
+        }
+        if (withMinutes && post.minutes) {
+            meta.append(el("span", "", post.minutes + t("minRead")));
+        }
+        return meta;
+    }
+
+    function postItem(post) {
+        const item = el("li", "post-item");
+        const link = el("a", "post-link");
+        link.href = "post.html?slug=" + encodeURIComponent(post.slug);
+
+        const text = el("div", "post-text");
+        text.append(postMeta(post, false), el("h3", "post-title", post.title));
+        if (post.description) {
+            text.append(el("p", "post-desc", post.description));
+        }
+        link.append(text);
+        item.append(link);
+        return item;
+    }
+
+    function renderList(list, posts) {
+        list.replaceChildren(...posts.map(postItem));
+        if (!posts.length) {
+            list.append(el("li", "post-empty", t("empty")));
+        }
+    }
+
+    async function hydratePostLists(root) {
+        const lists = root.querySelectorAll("[data-post-list]");
+        if (!lists.length) {
+            return;
+        }
+        let posts;
+        try {
+            posts = (await loadPostIndex()).map(localized);
+        } catch (error) {
+            lists.forEach((list) => list.replaceChildren(el("li", "post-empty", t("listFailed"))));
+            return;
+        }
+
+        lists.forEach((list) => {
+            const limit = Number(list.dataset.limit) || posts.length;
+            const filter = list.parentElement.querySelector("[data-category-filter]");
+            if (!filter) {
+                renderList(list, posts.slice(0, limit));
+                return;
+            }
+
+            const categories = [...new Set(posts.map((post) => post.category).filter(Boolean))];
+            const select = (category) => {
+                filter.querySelectorAll(".tag").forEach((button) => {
+                    button.setAttribute("aria-pressed", String(button.dataset.category === category));
+                });
+                renderList(list, posts.filter((post) => !category || post.category === category).slice(0, limit));
+            };
+            filter.replaceChildren(...["", ...categories].map((category) => {
+                const button = el("button", "tag", category || t("all"));
+                button.type = "button";
+                button.dataset.category = category;
+                button.addEventListener("click", () => select(category));
+                return button;
+            }));
+            select("");
+        });
+    }
+
+    /* ---------- Markdown ---------- */
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function resolveUrl(href, base) {
+        if (/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(href)) {
+            return href;
+        }
+        return base + href;
+    }
+
+    function safeUrl(href) {
+        return /^\s*(javascript|data|vbscript):/i.test(href) ? "#" : href;
+    }
+
+    function renderInline(text, base) {
+        const stash = [];
+        const keep = (html) => "\u0000" + (stash.push(html) - 1) + "\u0000";
+
+        let out = text.replace(/`([^`]+)`/g, (m, code) => keep("<code>" + escapeHtml(code) + "</code>"));
+        out = out.replace(/!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g, (m, alt, src) =>
+            keep('<img src="' + escapeHtml(safeUrl(resolveUrl(src, base))) + '" alt="' + escapeHtml(alt) + '" loading="lazy" decoding="async">'));
+        out = out.replace(/\[([^\]]+)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g, (m, label, href) => {
+            const url = safeUrl(resolveUrl(href, base));
+            const external = /^https?:/i.test(url);
+            return keep('<a href="' + escapeHtml(url) + '"' +
+                (external ? ' target="_blank" rel="noopener noreferrer"' : "") + ">") +
+                label + keep("</a>");
+        });
+        out = out.replace(/<(https?:\/\/[^>\s]+)>/g, (m, url) =>
+            keep('<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + "</a>"));
+
+        out = escapeHtml(out)
+            .replace(/(\*\*|__)(?=\S)([\s\S]*?\S)\1/g, "<strong>$2</strong>")
+            .replace(/\*(?=\S)([\s\S]*?\S)\*/g, "<em>$1</em>")
+            .replace(/~~(?=\S)([\s\S]*?\S)~~/g, "<del>$1</del>");
+
+        while (out.includes("\u0000")) {
+            out = out.replace(/\u0000(\d+)\u0000/g, (m, i) => stash[i]);
+        }
+        return out;
+    }
+
+    function splitRow(line) {
+        return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+    }
+
+    function renderMarkdown(source, base) {
+        const lines = source.replace(/\r\n?/g, "\n").split("\n");
+        const html = [];
+        let i = 0;
+
+        const isBlank = (line) => !line.trim();
+        const listMatch = (line) => line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+        const startsBlock = (line) =>
+            /^(#{1,6})\s/.test(line) || /^```/.test(line) || /^>/.test(line) ||
+            /^(\*{3,}|-{3,}|_{3,})\s*$/.test(line) || Boolean(listMatch(line));
+
+        function renderMdList(indent) {
+            const first = listMatch(lines[i]);
+            const ordered = /\d/.test(first[2]);
+            const tag = ordered ? "ol" : "ul";
+            const start = ordered ? parseInt(first[2], 10) : 1;
+            const parts = ["<" + tag + (ordered && start !== 1 ? ' start="' + start + '"' : "") + ">"];
+
+            while (i < lines.length) {
+                const match = listMatch(lines[i]);
+                if (!match || match[1].length !== indent || /\d/.test(match[2]) !== ordered) {
+                    break;
+                }
+                let text = match[3];
+                i += 1;
+                let nested = "";
+                while (i < lines.length && !isBlank(lines[i])) {
+                    const inner = listMatch(lines[i]);
+                    if (inner && inner[1].length > indent) {
+                        nested += renderMdList(inner[1].length);
+                    } else if (!inner && !startsBlock(lines[i].trim())) {
+                        text += " " + lines[i].trim();
+                        i += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if (i < lines.length && isBlank(lines[i])) {
+                    const next = lines.slice(i).find((line) => !isBlank(line));
+                    const nextMatch = next && listMatch(next);
+                    if (nextMatch && nextMatch[1].length === indent && /\d/.test(nextMatch[2]) === ordered) {
+                        while (isBlank(lines[i])) {
+                            i += 1;
+                        }
+                    }
+                }
+                parts.push("<li>" + renderInline(text, base) + nested + "</li>");
+            }
+            parts.push("</" + tag + ">");
+            return parts.join("");
+        }
+
+        while (i < lines.length) {
+            const line = lines[i];
+
+            if (isBlank(line)) {
+                i += 1;
+                continue;
+            }
+
+            const fence = line.match(/^```\s*([\w-]*)/);
+            if (fence) {
+                const code = [];
+                i += 1;
+                while (i < lines.length && !/^```/.test(lines[i])) {
+                    code.push(lines[i]);
+                    i += 1;
+                }
+                i += 1;
+                html.push("<pre><code>" + escapeHtml(code.join("\n")) + "</code></pre>");
+                continue;
+            }
+
+            const heading = line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
+            if (heading) {
+                const level = Math.max(heading[1].length, 2);
+                html.push("<h" + level + ">" + renderInline(heading[2], base) + "</h" + level + ">");
+                i += 1;
+                continue;
+            }
+
+            if (/^(\*{3,}|-{3,}|_{3,})\s*$/.test(line)) {
+                html.push("<hr>");
+                i += 1;
+                continue;
+            }
+
+            if (/^>/.test(line)) {
+                const quote = [];
+                while (i < lines.length && /^>/.test(lines[i])) {
+                    quote.push(lines[i].replace(/^>\s?/, ""));
+                    i += 1;
+                }
+                html.push("<blockquote>" + renderMarkdown(quote.join("\n"), base) + "</blockquote>");
+                continue;
+            }
+
+            const list = listMatch(line);
+            if (list) {
+                html.push(renderMdList(list[1].length));
+                continue;
+            }
+
+            if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-{3,}/.test(lines[i + 1])) {
+                const head = splitRow(line);
+                i += 2;
+                const rows = [];
+                while (i < lines.length && /^\s*\|/.test(lines[i])) {
+                    rows.push(splitRow(lines[i]));
+                    i += 1;
+                }
+                html.push(
+                    "<table><thead><tr>" + head.map((cell) => "<th>" + renderInline(cell, base) + "</th>").join("") +
+                    "</tr></thead><tbody>" +
+                    rows.map((row) => "<tr>" + row.map((cell) => "<td>" + renderInline(cell, base) + "</td>").join("") + "</tr>").join("") +
+                    "</tbody></table>"
+                );
+                continue;
+            }
+
+            const paragraph = [];
+            while (i < lines.length && !isBlank(lines[i]) && !(paragraph.length && startsBlock(lines[i]))) {
+                paragraph.push(lines[i].trim());
+                i += 1;
+            }
+            html.push("<p>" + renderInline(paragraph.join(" "), base) + "</p>");
+        }
+
+        return html.join("\n");
+    }
+
+    function stripFrontMatter(source) {
+        return source.replace(/^\ufeff?---\s*\n[\s\S]*?\n---\s*(\n|$)/, "");
+    }
+
+    /* ---------- Profile ---------- */
+
+    async function hydrateProfile(root) {
+        const target = root.querySelector("[data-profile]");
+        if (!target) {
+            return;
+        }
+        const requested = lang;
+        try {
+            const source = await fetchText(PROFILE_FILES[requested]);
+            if (requested === lang) {
+                target.innerHTML = renderMarkdown(stripFrontMatter(source), "blogs/");
+            }
+        } catch (error) {
+            /* Keep the text already on the page. */
+        }
+    }
+
+    /* ---------- Single post ---------- */
+
+    async function hydratePost(root) {
+        const target = root.querySelector("[data-post-content]");
+        if (!target) {
+            return;
+        }
+        const requested = lang;
+        const slug = new URLSearchParams(window.location.search).get("slug");
+        const show = (...nodes) => {
+            if (requested === lang) {
+                target.replaceChildren(...nodes);
+            }
+        };
+
+        let post;
+        try {
+            post = (await loadPostIndex()).find((entry) => entry.slug === slug);
+        } catch (error) {
+            show(el("p", "post-empty", t("postFailed")));
+            return;
+        }
+        if (!post) {
+            show(el("p", "post-empty", t("postMissing")));
+            return;
+        }
+        post = localized(post);
+
+        const header = el("header", "post-header");
+        header.append(el("h1", "section-title", post.title), postMeta(post, true));
+
+        try {
+            const source = stripFrontMatter(await fetchText(post.path));
+            const body = el("div", "post-body");
+            if (CJK.test(source) !== (lang === "zh-CN")) {
+                body.lang = CJK.test(source) ? "zh-CN" : "en";
+            }
+            body.innerHTML = renderMarkdown(source, post.path.replace(/[^/]*$/, ""));
+            show(header, body);
+        } catch (error) {
+            show(header, el("p", "post-empty", t("postFailed")));
+        }
+        if (requested === lang) {
+            document.title = post.title + " - " + t("blogs.title");
+        }
+    }
+
+    function hydrate(root) {
+        applyLanguage(root);
+        fadeInBackground(root);
+        hydrateProfile(root);
+        hydratePostLists(root);
+        hydratePost(root);
+    }
+
+    hydrate(document);
+
+    /* ---------- Language toggle ---------- */
+
+    document.addEventListener("click", (event) => {
+        const toggle = event.target instanceof Element ? event.target.closest("[data-lang-toggle]") : null;
+        if (!toggle) {
+            return;
+        }
+        lang = lang === "en" ? "zh-CN" : "en";
+        try {
+            localStorage.setItem("lang", lang);
+        } catch (error) {
+            /* Language just won't persist. */
+        }
+        hydrate(document);
+    });
 
     /* ---------- Prefetch and cache internal pages ---------- */
 
@@ -74,8 +529,12 @@
         return pathname.endsWith("/") ? pathname + "index.html" : pathname;
     }
 
+    function pageKey(url) {
+        return canonicalPath(url.pathname) + url.search;
+    }
+
     function isCurrentPath(url) {
-        return canonicalPath(url.pathname) === canonicalPath(window.location.pathname);
+        return pageKey(url) === pageKey(window.location);
     }
 
     function isInternalPage(url) {
@@ -105,20 +564,22 @@
 
     /* ---------- DOM swap ---------- */
 
+    /* Replace every top-level section of main; the nav stays in place. */
     function applyDocument(doc, url) {
         const currentMain = document.querySelector("main.page");
-        const currentSection = currentMain && currentMain.querySelector(":scope > section");
+        const currentSections = currentMain ? currentMain.querySelectorAll(":scope > section") : [];
         const newMain = doc.querySelector("main.page");
-        const newSection = newMain && newMain.querySelector(":scope > section");
+        const newSections = newMain ? newMain.querySelectorAll(":scope > section") : [];
 
-        if (!currentSection || !newSection) {
+        if (!currentSections.length || !newSections.length) {
             throw new Error("unexpected page structure");
         }
 
-        const freshSection = document.importNode(newSection, true);
-        typesetQuote(freshSection);
-        currentSection.replaceWith(freshSection);
+        const freshSections = [...newSections].map((section) => document.importNode(section, true));
+        currentSections[0].before(...freshSections);
+        currentSections.forEach((section) => section.remove());
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
+        currentMain.dataset.title = newMain.dataset.title || "";
         document.title = doc.title;
 
         const targetPath = canonicalPath(new URL(url, window.location.href).pathname);
@@ -135,23 +596,26 @@
         });
 
         window.scrollTo(0, 0);
-        freshSection.tabIndex = -1;
-        freshSection.focus({ preventScroll: true });
-        return freshSection;
+        const firstSection = freshSections[0];
+        firstSection.tabIndex = -1;
+        firstSection.focus({ preventScroll: true });
+        return currentMain;
     }
 
     /* Fallback for browsers without View Transitions. */
-    function fadeIn(section) {
-        if (typeof section.animate !== "function") {
+    function fadeIn(main) {
+        if (typeof main.animate !== "function") {
             return;
         }
-        section.animate(
-            [
-                { opacity: 0, transform: "translateY(6px)" },
-                { opacity: 1, transform: "none" }
-            ],
-            { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
-        );
+        main.querySelectorAll(":scope > section").forEach((section) => {
+            section.animate(
+                [
+                    { opacity: 0, transform: "translateY(6px)" },
+                    { opacity: 1, transform: "none" }
+                ],
+                { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+            );
+        });
     }
 
     /* ---------- Navigation ---------- */
@@ -166,11 +630,12 @@
 
         let doc;
         const swap = () => {
-            const section = applyDocument(doc, url);
             if (updateHistory) {
                 history.pushState(null, "", url);
             }
-            return section;
+            const main = applyDocument(doc, url);
+            hydrate(main);
+            return main;
         };
 
         try {
@@ -213,6 +678,8 @@
         event.preventDefault();
         if (!isCurrentPath(destination)) {
             navigateTo(destination.href, true);
+        } else {
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion.matches ? "auto" : "smooth" });
         }
     });
 
@@ -239,6 +706,9 @@
                 loadPage(url.href).catch(() => {});
             }
         });
+        loadPage("post.html").catch(() => {});
+        loadPostIndex().catch(() => {});
+        Object.values(PROFILE_FILES).forEach((path) => fetchText(path).catch(() => {}));
     }
 
     if ("requestIdleCallback" in window) {

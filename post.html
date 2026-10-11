@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mistvillion's Blogs</title>
+    <script>document.documentElement.classList.add("js");try{if(localStorage.getItem("lang")==="zh-CN"){document.documentElement.lang="zh-CN";}}catch(e){}</script>
+    <link rel="icon" href="assets/images/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.jpg">
+    <link rel="preload" href="assets/fonts/PTSerif-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="assets/fonts/PTSerif-Bold.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+    <main class="page" aria-label="Mistvillion's Blogs" data-title="blogs.title">
+        <nav class="top-nav" aria-label="Site navigation">
+            <div class="nav-links">
+                <a class="nav-link" href="index.html" data-i18n="nav.home">Home</a>
+                <a class="nav-link" href="blogs.html" data-i18n="nav.blogs">Blogs</a>
+                <a class="nav-link" href="https://github.com/Mistvillion" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+            <button class="lang-toggle" type="button" data-lang-toggle lang="zh-CN">中文</button>
+        </nav>
+
+        <section class="content-section post-view" aria-label="Post">
+            <article class="post" data-post>
+                <a class="more-link back-link" href="blogs.html" data-i18n="back">&larr; All writing</a>
+                <div data-post-content></div>
+            </article>
+        </section>
+    </main>
+
+    <script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -21,9 +21,8 @@
     color-scheme: dark;
     --ink: #f4f7fb;
     --muted: rgba(244, 247, 251, 0.72);
-    --gold: #f6d38a;
-    --nav-line: rgba(255, 255, 255, 0.32);
-    --page-base: #0d1424;
+    --pink: #f7a8c4;
+        --page-base: #000;
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -48,18 +47,26 @@ a {
     position: relative;
     min-height: 100vh;
     min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    isolation: isolate;
 }
 
 section:focus {
     outline: none;
 }
 
-/* Background image. */
+/* First screen: photo, nav and title block. Everything below sits on black. */
+.home {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    padding: 96px 72px 58px;
+}
+
+/* Background image, confined to the first screen. */
 .page-bg {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: -3;
     width: 100%;
@@ -78,110 +85,99 @@ html.js .page-bg:not(.is-loaded) {
 
 /* Directional shade: dark where text sits (top band for the nav,
    bottom-left for the title), the rest of the photo stays clear. */
-.page::before {
+.home::before,
+.home::after {
     content: "";
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: -2;
     pointer-events: none;
+}
+
+.home::before {
+    z-index: -2;
     background:
         linear-gradient(to bottom, rgba(13, 20, 36, 0.42), rgba(13, 20, 36, 0) 180px),
         radial-gradient(ellipse 85% 75% at 0% 100%, rgba(13, 20, 36, 0.78), rgba(13, 20, 36, 0.38) 45%, rgba(13, 20, 36, 0) 75%),
         linear-gradient(rgba(13, 20, 36, 0.1), rgba(13, 20, 36, 0.1));
 }
 
-/* Profile text sits over the middle of the photo, so it gets an even shade. */
-.page:has(.profile-view)::before {
-    background:
-        linear-gradient(to bottom, rgba(13, 20, 36, 0.3), rgba(13, 20, 36, 0) 180px),
-        linear-gradient(rgba(13, 20, 36, 0.58), rgba(13, 20, 36, 0.58));
+/* Bottom of the photo dissolves into the black page below. */
+.home::after {
+    top: auto;
+    z-index: -1;
+    height: 38%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 0.2) 30%,
+        rgba(0, 0, 0, 0.62) 65%,
+        #000
+    );
 }
 
-/* Liquid glass capsule nav, top right. */
+/* Full-width nav bar at the top: links on the left, language toggle on the right; scrolls away with the page. */
 .top-nav {
-    position: fixed;
-    top: 28px;
-    right: 32px;
-    z-index: 20;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    max-width: calc(100vw - 64px);
-    padding: 5px;
-    border: 1px solid var(--nav-line);
-    border-radius: 999px;
-    color: var(--ink);
-    background: transparent;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
-.top-nav::before {
-    content: "";
     position: absolute;
-    inset: 1px 16px auto;
-    height: 1px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 40px 20px 60px;
+    color: var(--ink);
 }
 
-.nav-link {
-    position: relative;
-    min-height: 34px;
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link,
+.lang-toggle {
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 16px;
-    border-radius: 999px;
+    padding: 0 12px;
     color: rgba(244, 247, 251, 0.74);
     text-decoration: none;
     white-space: nowrap;
-    font-size: 0.92rem;
+    font: inherit;
+    font-size: 1.12rem;
     letter-spacing: 0.03em;
-    transition:
-        color 180ms ease,
-        background-color 180ms ease,
-        transform 180ms ease;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+    transition: color 180ms ease;
 }
 
 .nav-link:hover,
-.nav-link:focus-visible {
+.nav-link:focus-visible,
+.lang-toggle:hover,
+.lang-toggle:focus-visible {
     color: var(--ink);
-    background-color: rgba(255, 255, 255, 0.1);
     outline: none;
 }
 
-.nav-link:focus-visible {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+.nav-link:focus-visible,
+.lang-toggle:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 6px;
 }
 
-/* Current page: full-strength text plus a small dot; gold stays reserved for titles. */
+/* Current page: pink text. */
 .nav-link[aria-current="page"] {
-    color: var(--ink);
+    color: var(--pink);
 }
 
-.nav-link[aria-current="page"]::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 4px;
-    width: 3px;
-    height: 3px;
-    margin-left: -1.5px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-/* Home and Profile share one full-height content region that scrolls if needed. */
-.home,
-.profile-view {
-    flex: 1;
-    display: flex;
-}
-
-.home {
-    align-items: flex-end;
-    padding: 96px 72px 58px;
+.lang-toggle {
+    min-width: 64px;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
 }
 
 .title-block {
@@ -191,7 +187,7 @@ html.js .page-bg:not(.is-loaded) {
 
 .site-title {
     margin: 0;
-    color: var(--gold);
+    color: var(--pink);
     font-size: clamp(2.5rem, 4.1vw, 4.3rem);
     font-weight: 700;
     line-height: 1.08;
@@ -208,64 +204,18 @@ html.js .page-bg:not(.is-loaded) {
     text-wrap: pretty;
 }
 
-/* Quote reveal: site.js splits the line into characters that slide in
-   one after another, like text unrolling along a path. */
-.quote-word {
-    display: inline-block;
-    white-space: nowrap;
-}
-
-.quote-char {
-    display: inline-block;
-    opacity: 0;
-    animation: quote-char-in 700ms var(--motion-soft) forwards;
-    animation-delay: calc(450ms + var(--i) * 28ms);
-}
-
-@keyframes quote-char-in {
-    from {
-        opacity: 0;
-        transform: translateX(-0.45em);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-/* Hide the plain line until it is split; reappear on its own if the script never runs. */
-@media (prefers-reduced-motion: no-preference) {
-    html.js .site-sub:not(.is-typeset) {
-        opacity: 0;
-        animation: quote-fallback 0s 1.5s forwards;
-    }
-}
-
-@keyframes quote-fallback {
-    to {
-        opacity: 1;
-    }
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* Profile: centered content, no title block. */
-.profile-view {
-    align-items: center;
+/* Sections below the first screen. */
+.content-section {
+    display: flex;
     justify-content: center;
-    padding: 128px 72px 72px;
+    padding: 96px 72px;
 }
 
+.content-section + .content-section {
+    padding-top: 0;
+}
+
+.section-inner,
 .profile-content {
     width: min(780px, 100%);
     display: grid;
@@ -274,46 +224,315 @@ html.js .page-bg:not(.is-loaded) {
     text-align: left;
 }
 
-.profile-content h1 {
+.section-title {
     margin: 0;
-    color: var(--gold);
-    font-size: clamp(2.5rem, 3.9vw, 3.9rem);
+    color: var(--pink);
+    font-size: clamp(2.2rem, 3.4vw, 3.4rem);
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: 0.01em;
+}
+
+.profile-text {
+    display: grid;
+    gap: 1em;
 }
 
 .profile-content p {
     max-width: 62ch;
     margin: 0;
     color: rgba(244, 247, 251, 0.86);
-    font-size: clamp(1.1rem, 1.6vw, 1.55rem);
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
     line-height: 1.8;
     letter-spacing: 0.01em;
     text-wrap: pretty;
 }
 
+.more-link {
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: color 180ms ease;
+}
+
+.more-link:hover,
+.more-link:focus-visible {
+    color: var(--ink);
+}
+
+/* Post list (Latest writing and Blogs). */
+.post-list {
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.post-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.post-link {
+    display: grid;
+    padding: 24px 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.post-text {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.post-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1.25rem, 1.8vw, 1.55rem);
+    font-weight: 700;
+    line-height: 1.35;
+    transition: color 180ms ease;
+}
+
+.post-link:hover .post-title,
+.post-link:focus-visible .post-title {
+    color: var(--pink);
+}
+
+.post-link:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 4px;
+}
+
+.post-desc {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    color: rgba(244, 247, 251, 0.56);
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+.post-empty {
+    padding: 24px 0;
+    color: var(--muted);
+}
+
+/* Category tags. */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 999px;
+    color: rgba(244, 247, 251, 0.82);
+    background: transparent;
+    font: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.category-filter:empty {
+    display: none;
+}
+
+.category-filter .tag {
+    min-height: 32px;
+    padding: 0 14px;
+    cursor: pointer;
+    transition:
+        color 180ms ease,
+        border-color 180ms ease,
+        background-color 180ms ease;
+}
+
+.category-filter .tag:hover,
+.category-filter .tag:focus-visible {
+    border-color: rgba(255, 255, 255, 0.6);
+    outline: none;
+}
+
+.category-filter .tag[aria-pressed="true"] {
+    border-color: var(--ink);
+    color: #000;
+    background: var(--ink);
+}
+
+/* Single post. */
+.post-view {
+    padding-top: 128px;
+}
+
+.post {
+    width: min(760px, 100%);
+}
+
+.post-header {
+    display: grid;
+    gap: 16px;
+    margin: 28px 0 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.post-header .section-title {
+    line-height: 1.25;
+}
+
+.post-body {
+    color: rgba(244, 247, 251, 0.86);
+    font-size: 1.08rem;
+    line-height: 1.9;
+    overflow-wrap: break-word;
+}
+
+.post-body > :first-child {
+    margin-top: 0;
+}
+
+.post-body p,
+.post-body ul,
+.post-body ol,
+.post-body blockquote,
+.post-body pre,
+.post-body figure {
+    margin: 0 0 1.25em;
+}
+
+.post-body h2,
+.post-body h3,
+.post-body h4 {
+    margin: 2em 0 0.8em;
+    color: var(--ink);
+    line-height: 1.4;
+}
+
+.post-body h2 {
+    font-size: 1.5rem;
+}
+
+.post-body h3 {
+    font-size: 1.25rem;
+}
+
+.post-body h4 {
+    font-size: 1.08rem;
+}
+
+.post-body a {
+    color: var(--pink);
+    text-underline-offset: 3px;
+}
+
+.post-body ul,
+.post-body ol {
+    padding-left: 1.6em;
+}
+
+.post-body li + li {
+    margin-top: 0.3em;
+}
+
+.post-body blockquote {
+    padding-left: 1em;
+    border-left: 2px solid rgba(255, 255, 255, 0.24);
+    color: var(--muted);
+}
+
+.post-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+.post-body code {
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.9em;
+}
+
+.post-body pre {
+    overflow-x: auto;
+    padding: 16px 18px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    line-height: 1.6;
+}
+
+.post-body pre code {
+    padding: 0;
+    background: none;
+}
+
+.post-body hr {
+    margin: 2.5em 0;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.post-body table {
+    width: 100%;
+    margin: 0 0 1.25em;
+    border-collapse: collapse;
+}
+
+.post-body th,
+.post-body td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    text-align: left;
+}
+
 /* Responsive spacing for phones. */
 @media (max-width: 640px) {
     .top-nav {
-        top: 16px;
-        right: 16px;
-        max-width: calc(100vw - 32px);
-        padding: 4px;
+        padding: 14px 16px 14px 14px;
     }
 
-    .nav-link {
+    .nav-links {
+        gap: 2px;
+    }
+
+    .nav-link,
+    .lang-toggle {
         min-height: 32px;
-        padding: 0 11px;
-        font-size: 0.86rem;
+        padding: 0 10px;
+        font-size: 1rem;
+    }
+
+    .lang-toggle {
+        min-width: 52px;
     }
 
     .home {
         padding: 88px 24px 30px;
     }
 
-    .profile-view {
-        padding: 88px 24px 56px;
+    .content-section {
+        padding: 64px 24px;
+    }
+
+    .post-view {
+        padding-top: 88px;
     }
 
     .site-title {
@@ -324,24 +543,24 @@ html.js .page-bg:not(.is-loaded) {
         font-size: 1.05rem;
     }
 
-    .profile-content h1 {
-        font-size: 2.3rem;
+    .section-title {
+        font-size: 2.1rem;
     }
 
     .profile-content p {
         font-size: 1.05rem;
     }
+
+    .post-body {
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 380px) {
-    .top-nav {
-        gap: 0;
-        padding: 3px;
-    }
-
-    .nav-link {
+    .nav-link,
+    .lang-toggle {
         padding: 0 8px;
-        font-size: 0.8rem;
+        font-size: 0.92rem;
     }
 
     .site-title {
@@ -357,8 +576,8 @@ html.js .page-bg:not(.is-loaded) {
     }
 }
 
-/* Internal page swaps: the unchanged background and nav make the root
-   cross-fade read as a section-only transition. */
+/* Internal page swaps: the unchanged nav makes the root
+   cross-fade read as a content-only transition. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation-duration: 220ms;
@@ -367,16 +586,15 @@ html.js .page-bg:not(.is-loaded) {
 
 @media (prefers-reduced-motion: reduce) {
     .page-bg,
-    .nav-link {
+    .nav-link,
+    .lang-toggle,
+    .more-link,
+    .post-title,
+    .category-filter .tag {
         transition: none !important;
     }
 
     html.js .page-bg:not(.is-loaded) {
         transform: none;
-    }
-
-    .quote-char {
-        opacity: 1;
-        animation: none;
     }
 }

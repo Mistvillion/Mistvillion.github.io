@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "2026-07-30-HongKong",
+    "published": "2026-07-30",
+    "en": {
+      "path": "blogs/2026-07-30-HongKong/en.md",
+      "title": "Fog Over the Harbour, Neon in a Dream",
+      "description": "Three days in Hong Kong, July 25–27",
+      "category": "Colorful Life",
+      "minutes": 19
+    },
+    "zh-CN": {
+      "path": "blogs/2026-07-30-HongKong/zh-CN.md",
+      "title": "雾锁维港，霓虹入梦",
+      "description": "7.25～7.27 香港三日游记",
+      "category": "多彩生活",
+      "minutes": 13
+    }
+  },
+  {
+    "slug": "2026-07-21-Workflow-for-AI-Coding",
+    "published": "2026-07-21",
+    "en": {
+      "path": "blogs/2026-07-21-Workflow-for-AI-Coding/en.md",
+      "title": "A Workflow for AI Coding",
+      "description": "Notes from a talk by Matt Pocock on AI coding",
+      "category": "Study Notes",
+      "minutes": 19
+    },
+    "zh-CN": {
+      "path": "blogs/2026-07-21-Workflow-for-AI-Coding/zh-CN.md",
+      "title": "AI Coding 的工作流",
+      "description": "Matt Pocock 的一次有关 AI Coding 的演讲内容总结",
+      "category": "学习心得",
+      "minutes": 14
+    }
+  }
+]
