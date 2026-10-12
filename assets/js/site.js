@@ -576,6 +576,19 @@
         }
 
         const freshSections = [...newSections].map((section) => document.importNode(section, true));
+
+        /* A background already on screen skips the first-load fade, so it doesn't blink. */
+        const shownBackgrounds = new Set(
+            [...currentMain.querySelectorAll(".page-bg.is-loaded")].map((bg) => bg.currentSrc || bg.src)
+        );
+        freshSections.forEach((section) => {
+            section.querySelectorAll(".page-bg").forEach((bg) => {
+                if (shownBackgrounds.has(bg.src)) {
+                    bg.classList.add("is-loaded");
+                }
+            });
+        });
+
         currentSections[0].before(...freshSections);
         currentSections.forEach((section) => section.remove());
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
