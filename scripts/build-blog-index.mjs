@@ -1,7 +1,7 @@
 // Rebuild blogs/index.json from the posts in blogs/.
-// Each post is a folder whose name is its unique slug, holding zh-CN.md and/or en.md
-// (images sit next to them). Front matter: title, published, description, category.
-// Loose files in blogs/ (profile-en.md, profile-zh.md, ...) are not posts.
+// Each post is a folder whose name is its unique slug, holding index.md
+// (images sit next to it). Front matter: title, published, description, category.
+// Loose files in blogs/ (profile.md, ...) are not posts.
 // Usage: node scripts/build-blog-index.mjs
 
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -10,7 +10,6 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const blogsDir = join(root, "blogs");
-const languages = ["en", "zh-CN"];
 
 function parseFrontMatter(source) {
     const match = source.match(/^\ufeff?---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/);
@@ -41,25 +40,20 @@ for (const slug of readdirSync(blogsDir)) {
         continue;
     }
 
-    const post = { slug, published: "" };
-    for (const lang of languages) {
-        const file = join(blogsDir, slug, lang + ".md");
-        if (!existsSync(file)) {
-            continue;
-        }
-        const { data, body } = parseFrontMatter(readFileSync(file, "utf8"));
-        post.published = post.published || data.published || "";
-        post[lang] = {
-            path: `blogs/${slug}/${lang}.md`,
-            title: data.title || slug,
-            description: data.description || "",
-            category: data.category || "",
-            minutes: readingMinutes(body)
-        };
+    const file = join(blogsDir, slug, "index.md");
+    if (!existsSync(file)) {
+        continue;
     }
-    if (languages.some((lang) => post[lang])) {
-        posts.push(post);
-    }
+    const { data, body } = parseFrontMatter(readFileSync(file, "utf8"));
+    posts.push({
+        slug,
+        published: data.published || "",
+        path: `blogs/${slug}/index.md`,
+        title: data.title || slug,
+        description: data.description || "",
+        category: data.category || "",
+        minutes: readingMinutes(body)
+    });
 }
 
 posts.sort((a, b) => b.published.localeCompare(a.published) || a.slug.localeCompare(b.slug));

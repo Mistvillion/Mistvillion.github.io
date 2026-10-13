@@ -22,7 +22,7 @@
     --ink: #f4f7fb;
     --muted: rgba(244, 247, 251, 0.72);
     --pink: #f7a8c4;
-        --page-base: #000;
+    --page-base: #000;
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -115,7 +115,7 @@ html.js .page-bg:not(.is-loaded) {
     );
 }
 
-/* Full-width nav bar at the top: links on the left, language toggle on the right; scrolls away with the page. */
+/* Full-width nav bar at the top: links at the top right; scrolls away with the page. */
 .top-nav {
     position: absolute;
     top: 0;
@@ -124,9 +124,9 @@ html.js .page-bg:not(.is-loaded) {
     z-index: 20;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
-    padding: 20px 40px 20px 60px;
+    padding: 20px 60px 20px 40px;
     color: var(--ink);
 }
 
@@ -136,8 +136,7 @@ html.js .page-bg:not(.is-loaded) {
     gap: 8px;
 }
 
-.nav-link,
-.lang-toggle {
+.nav-link {
     min-height: 36px;
     display: inline-flex;
     align-items: center;
@@ -154,15 +153,12 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .nav-link:hover,
-.nav-link:focus-visible,
-.lang-toggle:hover,
-.lang-toggle:focus-visible {
+.nav-link:focus-visible {
     color: var(--ink);
     outline: none;
 }
 
-.nav-link:focus-visible,
-.lang-toggle:focus-visible {
+.nav-link:focus-visible {
     text-decoration: underline;
     text-underline-offset: 6px;
 }
@@ -170,14 +166,6 @@ html.js .page-bg:not(.is-loaded) {
 /* Current page: pink text. */
 .nav-link[aria-current="page"] {
     color: var(--pink);
-}
-
-.lang-toggle {
-    min-width: 64px;
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    border-radius: 999px;
-    background: transparent;
-    cursor: pointer;
 }
 
 .title-block {
@@ -410,8 +398,7 @@ html.js .page-bg:not(.is-loaded) {
 .post-body ul,
 .post-body ol,
 .post-body blockquote,
-.post-body pre,
-.post-body figure {
+.post-body pre {
     margin: 0 0 1.25em;
 }
 
@@ -505,22 +492,17 @@ html.js .page-bg:not(.is-loaded) {
 /* Responsive spacing for phones. */
 @media (max-width: 640px) {
     .top-nav {
-        padding: 14px 16px 14px 14px;
+        padding: 14px 14px 14px 16px;
     }
 
     .nav-links {
         gap: 2px;
     }
 
-    .nav-link,
-    .lang-toggle {
+    .nav-link {
         min-height: 32px;
         padding: 0 10px;
         font-size: 1rem;
-    }
-
-    .lang-toggle {
-        min-width: 52px;
     }
 
     .home {
@@ -557,8 +539,7 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 @media (max-width: 380px) {
-    .nav-link,
-    .lang-toggle {
+    .nav-link {
         padding: 0 8px;
         font-size: 0.92rem;
     }
@@ -587,7 +568,6 @@ html.js .page-bg:not(.is-loaded) {
 @media (prefers-reduced-motion: reduce) {
     .page-bg,
     .nav-link,
-    .lang-toggle,
     .more-link,
     .post-title,
     .category-filter .tag {

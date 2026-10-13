@@ -2,73 +2,37 @@
   {
     "slug": "2026-07-30-HongKong",
     "published": "2026-07-30",
-    "en": {
-      "path": "blogs/2026-07-30-HongKong/en.md",
-      "title": "Fog Over the Harbour, Neon in a Dream",
-      "description": "Three days in Hong Kong, July 25–27",
-      "category": "Colorful Life",
-      "minutes": 19
-    },
-    "zh-CN": {
-      "path": "blogs/2026-07-30-HongKong/zh-CN.md",
-      "title": "雾锁维港，霓虹入梦",
-      "description": "7.25～7.27 香港三日游记",
-      "category": "多彩生活",
-      "minutes": 13
-    }
+    "path": "blogs/2026-07-30-HongKong/index.md",
+    "title": "雾锁维港，霓虹入梦",
+    "description": "7.25～7.27 香港三日游记",
+    "category": "多彩生活",
+    "minutes": 13
   },
   {
     "slug": "2026-07-21-Workflow-for-AI-Coding",
     "published": "2026-07-21",
-    "en": {
-      "path": "blogs/2026-07-21-Workflow-for-AI-Coding/en.md",
-      "title": "A Workflow for AI Coding",
-      "description": "Notes from a talk by Matt Pocock on AI coding",
-      "category": "Study Notes",
-      "minutes": 19
-    },
-    "zh-CN": {
-      "path": "blogs/2026-07-21-Workflow-for-AI-Coding/zh-CN.md",
-      "title": "AI Coding 的工作流",
-      "description": "Matt Pocock 的一次有关 AI Coding 的演讲内容总结",
-      "category": "学习心得",
-      "minutes": 14
-    }
+    "path": "blogs/2026-07-21-Workflow-for-AI-Coding/index.md",
+    "title": "AI Coding 的工作流",
+    "description": "Matt Pocock 的一次有关 AI Coding 的演讲内容总结",
+    "category": "学习心得",
+    "minutes": 14
   },
   {
     "slug": "2026-02-12-Hollow-Knight",
     "published": "2026-02-12",
-    "en": {
-      "path": "blogs/2026-02-12-Hollow-Knight/en.md",
-      "title": "Sacred Stillness, Silk and Soul",
-      "description": "Thoughts after playing Hollow Knight and Silksong",
-      "category": "Fleeting Joys",
-      "minutes": 7
-    },
-    "zh-CN": {
-      "path": "blogs/2026-02-12-Hollow-Knight/zh-CN.md",
-      "title": "神圣静穆，丝与灵魂",
-      "description": "《空洞骑士》与《丝之歌》玩后感受",
-      "category": "瞬息欢愉",
-      "minutes": 5
-    }
+    "path": "blogs/2026-02-12-Hollow-Knight/index.md",
+    "title": "神圣静穆，丝与灵魂",
+    "description": "《空洞骑士》与《丝之歌》玩后感受",
+    "category": "瞬息欢愉",
+    "minutes": 5
   },
   {
     "slug": "2026-01-24-Travel-JiangZheHu",
     "published": "2026-01-24",
-    "en": {
-      "path": "blogs/2026-01-24-Travel-JiangZheHu/en.md",
-      "title": "Misty Willows, Painted Bridges",
-      "description": "A travel diary from Shanghai, Suzhou and Hangzhou, January 18 to 23, 2026",
-      "category": "Colorful Life",
-      "minutes": 8
-    },
-    "zh-CN": {
-      "path": "blogs/2026-01-24-Travel-JiangZheHu/zh-CN.md",
-      "title": "烟柳画桥，风帘翠幕",
-      "description": "2026年1月18日至1月23日在上海、苏州、杭州游玩日记",
-      "category": "多彩生活",
-      "minutes": 5
-    }
+    "path": "blogs/2026-01-24-Travel-JiangZheHu/index.md",
+    "title": "烟柳画桥，风帘翠幕",
+    "description": "2026年1月18日至1月23日在上海、苏州、杭州游玩日记",
+    "category": "多彩生活",
+    "minutes": 5
   }
 ]

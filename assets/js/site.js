@@ -2,7 +2,6 @@
    First load: content shows at once; the background fades in when loaded.
    Internal links: prefetch + DOM swap inside a View Transition.
    Failure: full-page navigation.
-   Language: English or Chinese, remembered in localStorage.
    Blog data: blogs/index.json lists posts; posts and the profile are Markdown rendered here. */
 
 (function () {
@@ -26,93 +25,36 @@
         }
     }
 
-    /* ---------- Language ---------- */
+    /* ---------- Text ---------- */
 
+    /* Hero and navigation are English; everything below the fold is Chinese. */
     const TEXT = {
-        "en": {
-            "nav.home": "Home",
-            "nav.blogs": "Blogs",
-            "toggle": "中文",
-            "home.title": "Mistvillion's Home",
-            "blogs.title": "Mistvillion's Blogs",
-            "quote": "Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.",
-            "profile": "Profile",
-            "latest": "Latest writing",
-            "allWriting": "All writing →",
-            "writing": "Writing",
-            "all": "All",
-            "filter": "Filter by category",
-            "back": "← All writing",
-            "minRead": " min read",
-            "empty": "Nothing here yet.",
-            "listFailed": "Posts could not be loaded.",
-            "postFailed": "The post could not be loaded.",
-            "postMissing": "This post does not exist."
-        },
-        "zh-CN": {
-            "nav.home": "首页",
-            "nav.blogs": "博客",
-            "toggle": "en",
-            "home.title": "北城烟雨阁的主页",
-            "blogs.title": "北城烟雨阁的博客",
-            "quote": "此情可待成追忆，只是当时已惘然。",
-            "profile": "简介",
-            "latest": "最新文章",
-            "allWriting": "全部文章 →",
-            "writing": "文章",
-            "all": "全部",
-            "filter": "按分类筛选",
-            "back": "← 全部文章",
-            "minRead": " 分钟阅读",
-            "empty": "暂无文章。",
-            "listFailed": "文章列表加载失败。",
-            "postFailed": "文章加载失败。",
-            "postMissing": "文章不存在。"
-        }
+        "blogs.title": "Mistvillion's Blogs",
+        "all": "全部",
+        "minRead": " 分钟阅读",
+        "empty": "暂无文章。",
+        "listFailed": "文章列表加载失败。",
+        "postFailed": "文章加载失败。",
+        "postMissing": "文章不存在。"
     };
 
-    const PROFILE_FILES = { "en": "blogs/profile-en.md", "zh-CN": "blogs/profile-zh.md" };
-
-    function readStoredLang() {
-        try {
-            return localStorage.getItem("lang") === "zh-CN" ? "zh-CN" : "en";
-        } catch (error) {
-            return "en";
-        }
-    }
-
-    let lang = readStoredLang();
+    const PROFILE_FILE = "blogs/profile.md";
 
     function t(key) {
-        return TEXT[lang][key];
+        return TEXT[key];
     }
 
-    /* Swap every labelled string, the toggle and the tab title to the current language. */
-    function applyLanguage(root) {
-        document.documentElement.lang = lang;
-        root.querySelectorAll("[data-i18n]").forEach((node) => {
-            node.textContent = t(node.dataset.i18n);
-        });
-        root.querySelectorAll("[data-i18n-label]").forEach((node) => {
-            node.setAttribute("aria-label", t(node.dataset.i18nLabel));
-        });
-
-        const toggle = document.querySelector("[data-lang-toggle]");
-        if (toggle) {
-            toggle.textContent = t("toggle");
-            toggle.lang = lang === "en" ? "zh-CN" : "en";
-        }
-
+    /* Keep the tab title in sync with the page's data-title. */
+    function applyTitle() {
         const main = document.querySelector("main.page");
         if (main && main.dataset.title) {
-            document.title = t(main.dataset.title);
-            main.setAttribute("aria-label", t(main.dataset.title));
+            document.title = main.dataset.title;
+            main.setAttribute("aria-label", main.dataset.title);
         }
     }
 
     /* ---------- Blog data ---------- */
 
-    const CJK = /[\u3400-\u9fff\uf900-\ufaff]/;
     let postIndex = null;
     const textCache = new Map();
 
@@ -147,12 +89,6 @@
         return postIndex;
     }
 
-    /* The post in the current language, falling back to whichever version exists. */
-    function localized(post) {
-        const version = post[lang] || post.en || post["zh-CN"];
-        return Object.assign({ slug: post.slug, published: post.published }, version);
-    }
-
     function el(tag, className, text) {
         const node = document.createElement(tag);
         if (className) {
@@ -160,9 +96,6 @@
         }
         if (text) {
             node.textContent = text;
-            if (CJK.test(text) !== (lang === "zh-CN")) {
-                node.lang = CJK.test(text) ? "zh-CN" : "en";
-            }
         }
         return node;
     }
@@ -210,7 +143,7 @@
         }
         let posts;
         try {
-            posts = (await loadPostIndex()).map(localized);
+            posts = await loadPostIndex();
         } catch (error) {
             lists.forEach((list) => list.replaceChildren(el("li", "post-empty", t("listFailed"))));
             return;
@@ -437,12 +370,9 @@
         if (!target) {
             return;
         }
-        const requested = lang;
         try {
-            const source = await fetchText(PROFILE_FILES[requested]);
-            if (requested === lang) {
-                target.innerHTML = renderMarkdown(stripFrontMatter(source), "blogs/");
-            }
+            const source = await fetchText(PROFILE_FILE);
+            target.innerHTML = renderMarkdown(stripFrontMatter(source), "blogs/");
         } catch (error) {
             /* Keep the text already on the page. */
         }
@@ -455,13 +385,8 @@
         if (!target) {
             return;
         }
-        const requested = lang;
         const slug = new URLSearchParams(window.location.search).get("slug");
-        const show = (...nodes) => {
-            if (requested === lang) {
-                target.replaceChildren(...nodes);
-            }
-        };
+        const show = (...nodes) => target.replaceChildren(...nodes);
 
         let post;
         try {
@@ -474,7 +399,6 @@
             show(el("p", "post-empty", t("postMissing")));
             return;
         }
-        post = localized(post);
 
         const header = el("header", "post-header");
         header.append(el("h1", "section-title", post.title), postMeta(post, true));
@@ -482,21 +406,16 @@
         try {
             const source = stripFrontMatter(await fetchText(post.path));
             const body = el("div", "post-body");
-            if (CJK.test(source) !== (lang === "zh-CN")) {
-                body.lang = CJK.test(source) ? "zh-CN" : "en";
-            }
             body.innerHTML = renderMarkdown(source, post.path.replace(/[^/]*$/, ""));
             show(header, body);
         } catch (error) {
             show(header, el("p", "post-empty", t("postFailed")));
         }
-        if (requested === lang) {
-            document.title = post.title + " - " + t("blogs.title");
-        }
+        document.title = post.title + " - " + t("blogs.title");
     }
 
     function hydrate(root) {
-        applyLanguage(root);
+        applyTitle();
         fadeInBackground(root);
         hydrateProfile(root);
         hydratePostLists(root);
@@ -504,22 +423,6 @@
     }
 
     hydrate(document);
-
-    /* ---------- Language toggle ---------- */
-
-    document.addEventListener("click", (event) => {
-        const toggle = event.target instanceof Element ? event.target.closest("[data-lang-toggle]") : null;
-        if (!toggle) {
-            return;
-        }
-        lang = lang === "en" ? "zh-CN" : "en";
-        try {
-            localStorage.setItem("lang", lang);
-        } catch (error) {
-            /* Language just won't persist. */
-        }
-        hydrate(document);
-    });
 
     /* ---------- Prefetch and cache internal pages ---------- */
 
@@ -721,7 +624,7 @@
         });
         loadPage("post.html").catch(() => {});
         loadPostIndex().catch(() => {});
-        Object.values(PROFILE_FILES).forEach((path) => fetchText(path).catch(() => {}));
+        fetchText(PROFILE_FILE).catch(() => {});
     }
 
     if ("requestIdleCallback" in window) {
