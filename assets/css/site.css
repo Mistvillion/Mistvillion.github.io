@@ -115,19 +115,23 @@ html.js .page-bg:not(.is-loaded) {
     );
 }
 
-/* Full-width nav bar at the top: links at the top right; scrolls away with the page. */
+/* Nav pinned to the top right of the viewport; the bar itself ignores
+   pointer events so only the links are clickable. */
 .top-nav {
-    position: absolute;
+    position: fixed;
     top: 0;
-    left: 0;
     right: 0;
     z-index: 20;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 16px;
     padding: 20px 60px 20px 40px;
     color: var(--ink);
+    pointer-events: none;
+}
+
+.top-nav .nav-links {
+    pointer-events: auto;
 }
 
 .nav-links {
@@ -166,6 +170,46 @@ html.js .page-bg:not(.is-loaded) {
 /* Current page: pink text. */
 .nav-link[aria-current="page"] {
     color: var(--pink);
+}
+
+/* Scroll-down hint at the bottom centre of the first screen. */
+.scroll-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: rgba(244, 247, 251, 0.82);
+    cursor: pointer;
+    transform: translateX(-50%);
+    animation: scroll-hint-bounce 1.8s ease-in-out infinite;
+}
+
+.scroll-hint::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translate(-50%, -75%) rotate(45deg);
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.5));
+}
+
+.scroll-hint:hover,
+.scroll-hint:focus-visible {
+    color: var(--pink);
+    outline: none;
+}
+
+@keyframes scroll-hint-bounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 10px); }
 }
 
 .title-block {
@@ -566,6 +610,10 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .scroll-hint {
+        animation: none;
+    }
+
     .page-bg,
     .nav-link,
     .more-link,

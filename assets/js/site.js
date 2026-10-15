@@ -599,6 +599,16 @@
         }
     });
 
+    /* ---------- Scroll hint: jump to the section below the first screen ---------- */
+
+    document.addEventListener("click", (event) => {
+        const hint = event.target.closest(".scroll-hint");
+        const next = hint && hint.closest("section").nextElementSibling;
+        if (next) {
+            next.scrollIntoView({ behavior: prefersReducedMotion.matches ? "auto" : "smooth" });
+        }
+    });
+
     /* ---------- Back and forward ---------- */
 
     window.addEventListener("popstate", () => {
