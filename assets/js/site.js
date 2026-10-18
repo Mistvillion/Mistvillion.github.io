@@ -38,7 +38,7 @@
         "postMissing": "文章不存在。"
     };
 
-    const PROFILE_FILE = "blogs/profile.md";
+    const PROFILE_FILE = "blogs/about.md";
 
     function t(key) {
         return TEXT[key];
