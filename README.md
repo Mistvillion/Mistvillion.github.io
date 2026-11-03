@@ -1,6 +1,6 @@
 # Mistvillion's Home
 
-个人主页 [sparklerain.top](https://sparklerain.top) 的源码。纯静态站点，零依赖，GitHub Pages 部署。
+个人主页 [mistvillion.com](https://mistvillion.com) 的源码。纯静态站点，零依赖，GitHub Pages 部署。
 
 ## 本地预览
 
