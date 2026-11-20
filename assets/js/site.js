@@ -424,6 +424,43 @@
 
     hydrate(document);
 
+    /* ---------- 滚动时显隐导航 ---------- */
+
+    const topNav = document.querySelector(".top-nav");
+    const navScrollThreshold = 8;
+    let navScrollAnchor = Math.max(0, window.scrollY);
+
+    function resetNavScroll() {
+        navScrollAnchor = 0;
+        if (topNav) {
+            topNav.classList.remove("is-scroll-hidden");
+        }
+    }
+
+    if (topNav) {
+        window.addEventListener("scroll", () => {
+            // 限制在实际滚动范围内，避免触底回弹被当成上滑。
+            const root = document.documentElement;
+            const scrollY = Math.max(0, Math.min(window.scrollY, root.scrollHeight - root.clientHeight));
+            if (scrollY === 0) {
+                resetNavScroll();
+                return;
+            }
+
+            const delta = scrollY - navScrollAnchor;
+            const hidden = topNav.classList.contains("is-scroll-hidden");
+
+            // 保留当前方向的极值，反向滚动累积到阈值才切换。
+            if (hidden ? delta < 0 : delta > 0) {
+                if (Math.abs(delta) < navScrollThreshold) {
+                    return;
+                }
+                topNav.classList.toggle("is-scroll-hidden", !hidden);
+            }
+            navScrollAnchor = scrollY;
+        }, { passive: true });
+    }
+
     /* ---------- Prefetch and cache internal pages ---------- */
 
     const pageCache = new Map();
@@ -512,6 +549,7 @@
         });
 
         window.scrollTo(0, 0);
+        resetNavScroll();
         const firstSection = freshSections[0];
         firstSection.tabIndex = -1;
         firstSection.focus({ preventScroll: true });

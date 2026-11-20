@@ -128,6 +128,12 @@ html.js .page-bg:not(.is-loaded) {
     padding: 20px 60px 20px 40px;
     color: var(--ink);
     pointer-events: none;
+    transition: transform 200ms var(--motion-soft);
+}
+
+/* 键盘焦点进入导航时仍要显示，避免链接停留在屏幕外。 */
+.top-nav.is-scroll-hidden:not(:has(:focus-visible)) {
+    transform: translateY(-100%);
 }
 
 .top-nav .nav-links {
@@ -615,6 +621,7 @@ html.js .page-bg:not(.is-loaded) {
     }
 
     .page-bg,
+    .top-nav,
     .nav-link,
     .more-link,
     .post-title,
