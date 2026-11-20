@@ -1,14 +1,5 @@
 [
   {
-    "slug": "2026-11-11-Linux",
-    "published": "2026-11-11",
-    "path": "blogs/2026-11-11-Linux/index.md",
-    "title": "Linux 文件系统与开发环境",
-    "description": "以 Ubuntu 22.04 LTS 为基准，从命令行基础到文件权限、开发环境与故障排查",
-    "category": "学习心得",
-    "minutes": 30
-  },
-  {
     "slug": "2026-10-19-Oskar-Concert",
     "published": "2026-10-19",
     "path": "blogs/2026-10-19-Oskar-Concert/index.md",

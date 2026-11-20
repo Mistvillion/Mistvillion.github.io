@@ -36,7 +36,8 @@
         "listFailed": "文章列表加载失败。",
         "postFailed": "文章加载失败。",
         "postMissing": "文章不存在。",
-        "postSection": "章节"
+        "postSection": "章节",
+        "commentsFailed": "评论加载失败，请刷新后重试。"
     };
 
     const PROFILE_FILE = "blogs/about.md";
@@ -548,6 +549,38 @@
 
     /* ---------- 文章加载 ---------- */
 
+    function mountPostComments(comments, slug) {
+        const container = comments.querySelector("[data-giscus]");
+        if (!container || container.querySelector("script")) {
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.crossOrigin = "anonymous";
+        // giscus 会查找全页的 .giscus；按插入顺序执行，避免旧脚本覆盖新文章的评论。
+        script.async = false;
+        Object.assign(script.dataset, {
+            repo: "Mistvillion/Mistvillion.github.io",
+            repoId: "R_kgDORL2RGQ",
+            category: "Announcements",
+            categoryId: "DIC_kwDORL2RGc4DCuBS",
+            mapping: "specific",
+            term: slug,
+            strict: "1",
+            reactionsEnabled: "1",
+            emitMetadata: "0",
+            inputPosition: "bottom",
+            theme: "dark",
+            lang: "zh-CN",
+            loading: "lazy"
+        });
+        script.addEventListener("error", () => {
+            container.replaceChildren(el("p", "", t("commentsFailed")));
+        }, { once: true });
+        container.append(script);
+    }
+
     async function hydratePost(root) {
         const target = root.querySelector("[data-post-content]");
         if (!target) {
@@ -590,6 +623,7 @@
             const view = target.closest(".post-view");
             const comments = view.querySelector("#comments");
             comments.hidden = false;
+            mountPostComments(comments, post.slug);
             disposePostToc = mountPostToc(view.querySelector("[data-post-toc]"), title, body, comments);
             restoreFragment();
         }
