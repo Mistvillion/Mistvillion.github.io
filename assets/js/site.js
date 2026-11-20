@@ -35,7 +35,8 @@
         "empty": "暂无文章。",
         "listFailed": "文章列表加载失败。",
         "postFailed": "文章加载失败。",
-        "postMissing": "文章不存在。"
+        "postMissing": "文章不存在。",
+        "postSection": "章节"
     };
 
     const PROFILE_FILE = "blogs/about.md";
@@ -304,7 +305,9 @@
             const heading = line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
             if (heading) {
                 const level = Math.max(heading[1].length, 2);
-                html.push("<h" + level + ">" + renderInline(heading[2], base) + "</h" + level + ">");
+                // 目录只收录原文的 ##，不包括降级后同为 h2 的一级标题。
+                const tocMarker = heading[1].length === 2 ? " data-toc-heading" : "";
+                html.push("<h" + level + tocMarker + ">" + renderInline(heading[2], base) + "</h" + level + ">");
                 i += 1;
                 continue;
             }
@@ -378,7 +381,172 @@
         }
     }
 
-    /* ---------- Single post ---------- */
+    /* ---------- 文章目录 ---------- */
+
+    let disposePostToc = null;
+
+    function headingId(text) {
+        const base = text.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, "-")
+            .replace(/^-+|-+$/g, "") || "section";
+        let id = base;
+        for (let suffix = 2; document.getElementById(id); suffix += 1) {
+            id = base + "-" + suffix;
+        }
+        return id;
+    }
+
+    function mountPostToc(toc, title, body, comments) {
+        const toggle = toc.querySelector(".post-toc-toggle");
+        const panel = toc.querySelector(".post-toc-panel");
+        const map = toc.querySelector(".post-toc-map");
+        const list = toc.querySelector(".post-toc-list");
+        const commentLink = toc.querySelector(".post-toc-comments");
+
+        function makeRow(target, text, href, labelTag = "span") {
+            target.tabIndex = -1;
+            const link = el("a", "post-toc-link");
+            link.href = href;
+            link.append(el(labelTag, "post-toc-label", text));
+            const item = el("li");
+            item.append(link);
+            return { target, link, item };
+        }
+
+        const titleRow = makeRow(title, title.textContent, "#", "strong");
+        const chapters = [...body.querySelectorAll(":scope > [data-toc-heading]")].map((target) => {
+            const text = target.textContent.trim().replace(/\s+/g, " ") || target.querySelector("img")?.alt.trim() || t("postSection");
+            target.id = headingId(text);
+            return makeRow(target, text, "#" + encodeURIComponent(target.id));
+        });
+        const rows = [titleRow, ...chapters];
+        list.replaceChildren(...rows.map(({ item }) => item));
+        toc.hidden = false;
+
+        const entries = [...rows, { target: comments, link: commentLink }];
+        const desktop = window.matchMedia("(min-width: 1160px) and (hover: hover) and (pointer: fine)");
+        const lifetime = new AbortController();
+        const events = { signal: lifetime.signal };
+        const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+        const close = () => toggle.setAttribute("aria-expanded", "false");
+        let offsets, stops, scrollMargin, maxScroll;
+        let active = -1;
+        let dirty = true;
+        let frame = 0;
+
+        function measure() {
+            const y = window.scrollY;
+            // 标题项代表页面顶部，后续条目对应正文里的锚点。
+            offsets = entries.map(({ target }, i) => i === 0 ? 0 : target.getBoundingClientRect().top + y);
+            scrollMargin = parseFloat(getComputedStyle(comments).scrollMarginTop);
+            maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            if (desktop.matches) {
+                // 按各章节的实际长度分配轨道，文字行仍保有最小间距。
+                rows.forEach(({ item }, i) => item.style.setProperty("--toc-span", offsets[i + 1] - offsets[i]));
+                const dot = parseFloat(getComputedStyle(list).getPropertyValue("--toc-marker-y"));
+                stops = [...rows.map(({ item }) => item.offsetTop + dot), list.offsetHeight];
+            }
+        }
+
+        function update() {
+            frame = 0;
+            if (dirty) {
+                measure();
+                dirty = false;
+            }
+            const y = Math.max(0, window.scrollY);
+            const cursor = y + scrollMargin + 1;
+            const reached = offsets.findLastIndex((offset) => offset <= cursor);
+            const atEnd = y >= maxScroll - 1;
+            let selected = reached;
+            if (atEnd) {
+                // 若目标离文末太近，无法滚到阅读基准线，仍选中该锚点。
+                const fragment = fragmentTarget(window.location.hash);
+                const anchored = entries.findIndex(({ target }, i) => target === fragment && offsets[i] > cursor);
+                selected = anchored >= 0 ? anchored : y > 0 ? entries.length - 1 : reached;
+            }
+            if (selected !== active) {
+                entries[active]?.link.removeAttribute("aria-current");
+                entries[selected]?.link.setAttribute("aria-current", "location");
+                active = selected;
+            }
+
+            if (desktop.matches) {
+                const trackHeight = stops.at(-1);
+                const next = reached + 1;
+                let fill = trackHeight;
+                if (next < offsets.length && !(atEnd && (y > 0 || active === entries.length - 1))) {
+                    const start = offsets[reached];
+                    const part = (cursor - start) / (offsets[next] - start);
+                    fill = stops[reached] + part * (stops[next] - stops[reached]);
+                }
+                list.style.setProperty("--toc-progress", (trackHeight ? (100 * fill / trackHeight).toFixed(2) : "0") + "%");
+
+                // 轨道过长时跟随当前圆点，但不抢走用户正在操作的目录。
+                if (!toc.matches(":hover, :focus-within") && map.scrollHeight > map.clientHeight) {
+                    const dot = stops[active];
+                    map.scrollTop = Math.max(dot + 16 - map.clientHeight, Math.min(dot - 16, map.scrollTop));
+                }
+            }
+        }
+
+        function schedule() {
+            if (!frame) {
+                frame = requestAnimationFrame(update);
+            }
+        }
+
+        function remeasure() {
+            dirty = true;
+            schedule();
+        }
+
+        const observer = new ResizeObserver(remeasure);
+        observer.observe(toc.closest(".post-view"));
+        window.addEventListener("scroll", schedule, { ...events, passive: true });
+        window.addEventListener("resize", remeasure, events);
+        window.addEventListener("popstate", schedule, events);
+        desktop.addEventListener("change", () => {
+            close();
+            remeasure();
+        }, events);
+
+        toggle.addEventListener("click", () => toggle.setAttribute("aria-expanded", String(!isOpen())), events);
+        panel.addEventListener("click", (event) => {
+            const link = event.target.closest("a[href]");
+            if (isPlainClick(event) && link) {
+                close();
+                if (link === titleRow.link) {
+                    title.focus({ preventScroll: true });
+                }
+                schedule();
+            }
+        }, events);
+        document.addEventListener("click", (event) => {
+            if (isOpen() && !toc.contains(event.target)) {
+                close();
+            }
+        }, events);
+        toc.addEventListener("focusout", (event) => {
+            if (event.relatedTarget && !toc.contains(event.relatedTarget)) {
+                close();
+            }
+        }, events);
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && isOpen()) {
+                close();
+                toggle.focus({ preventScroll: true });
+            }
+        }, events);
+        schedule();
+
+        return () => {
+            lifetime.abort();
+            observer.disconnect();
+            cancelAnimationFrame(frame);
+        };
+    }
+
+    /* ---------- 文章加载 ---------- */
 
     async function hydratePost(root) {
         const target = root.querySelector("[data-post-content]");
@@ -401,17 +569,30 @@
         }
 
         const header = el("header", "post-header");
-        header.append(el("h1", "section-title", post.title), postMeta(post, true));
+        const title = el("h1", "section-title", post.title);
+        header.append(title, postMeta(post, true));
 
+        let body;
         try {
             const source = stripFrontMatter(await fetchText(post.path));
-            const body = el("div", "post-body");
-            body.innerHTML = renderMarkdown(source, post.path.replace(/[^/]*$/, ""));
-            show(header, body);
+            const content = el("div", "post-body");
+            content.innerHTML = renderMarkdown(source, post.path.replace(/[^/]*$/, ""));
+            show(header, content);
+            body = content;
         } catch (error) {
             show(header, el("p", "post-empty", t("postFailed")));
         }
+        if (!target.isConnected) {
+            return;
+        }
         document.title = post.title + " - " + t("blogs.title");
+        if (body) {
+            const view = target.closest(".post-view");
+            const comments = view.querySelector("#comments");
+            comments.hidden = false;
+            disposePostToc = mountPostToc(view.querySelector("[data-post-toc]"), title, body, comments);
+            restoreFragment();
+        }
     }
 
     function hydrate(root) {
@@ -529,6 +710,10 @@
             });
         });
 
+        if (disposePostToc) {
+            disposePostToc();
+            disposePostToc = null;
+        }
         currentSections[0].before(...freshSections);
         currentSections.forEach((section) => section.remove());
         currentMain.setAttribute("aria-label", newMain.getAttribute("aria-label") || "");
@@ -562,19 +747,30 @@
             return;
         }
         main.querySelectorAll(":scope > section").forEach((section) => {
-            section.animate(
-                [
-                    { opacity: 0, transform: "translateY(6px)" },
-                    { opacity: 1, transform: "none" }
-                ],
-                { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
-            );
+            // 文章页只淡入，避免 transform 改变固定目录的定位基准。
+            const keyframes = section.classList.contains("post-view")
+                ? [{ opacity: 0 }, { opacity: 1 }]
+                : [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }];
+            section.animate(keyframes, { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
         });
     }
 
     /* ---------- Navigation ---------- */
 
     let navigating = false;
+    let renderedPageKey = pageKey(window.location);
+
+    function fragmentTarget(hash) {
+        try {
+            return hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function restoreFragment() {
+        fragmentTarget(window.location.hash)?.scrollIntoView();
+    }
 
     async function navigateTo(url, updateHistory) {
         if (navigating) {
@@ -588,6 +784,7 @@
                 history.pushState(null, "", url);
             }
             const main = applyDocument(doc, url);
+            renderedPageKey = pageKey(window.location);
             hydrate(main);
             return main;
         };
@@ -610,12 +807,13 @@
 
     /* ---------- Click handling ---------- */
 
+    function isPlainClick(event) {
+        return !event.defaultPrevented && event.button === 0 &&
+            !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+    }
+
     document.addEventListener("click", (event) => {
-        if (
-            event.defaultPrevented ||
-            event.button !== 0 ||
-            event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
-        ) {
+        if (!isPlainClick(event)) {
             return;
         }
 
@@ -629,9 +827,24 @@
             return;
         }
 
-        event.preventDefault();
         if (!isCurrentPath(destination)) {
+            event.preventDefault();
             navigateTo(destination.href, true);
+            return;
+        }
+
+        const target = fragmentTarget(destination.hash);
+        if (destination.hash && !target) {
+            return;
+        }
+        event.preventDefault();
+        if (destination.hash !== window.location.hash) {
+            history.pushState(null, "", destination.href);
+        }
+        if (target) {
+            target.focus({ preventScroll: true });
+            // 直接定位，让浏览器在懒加载图片改变高度时保持锚点可见。
+            target.scrollIntoView();
         } else {
             window.scrollTo({ top: 0, behavior: prefersReducedMotion.matches ? "auto" : "smooth" });
         }
@@ -652,6 +865,15 @@
     window.addEventListener("popstate", () => {
         if (navigating) {
             window.location.reload();
+            return;
+        }
+        // 同一篇文章的锚点历史不触发页面切换或重复加载正文。
+        if (pageKey(window.location) === renderedPageKey) {
+            if (window.location.hash) {
+                restoreFragment();
+            } else {
+                window.scrollTo(0, 0);
+            }
             return;
         }
         navigateTo(window.location.href, false);

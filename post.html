@@ -22,9 +22,32 @@
         </nav>
 
         <section class="content-section post-view" aria-label="文章" lang="zh-CN">
+            <div class="post-toc" data-post-toc hidden>
+                <button class="post-toc-toggle" type="button" aria-controls="post-toc-panel" aria-expanded="false">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true">
+                        <path d="M3 5h.5m3.5 0h10M3 10h.5m3.5 0h10M3 15h.5m3.5 0h10" />
+                    </svg>
+                    目录
+                </button>
+                <nav class="post-toc-panel" id="post-toc-panel" aria-label="文章目录">
+                    <div class="post-toc-map">
+                        <ol class="post-toc-list"></ol>
+                    </div>
+                    <a class="post-toc-comments" href="#comments">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 3.5h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3l-4.5 3v-3H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z" />
+                        </svg>
+                        <span class="post-toc-label">评论</span>
+                    </a>
+                </nav>
+            </div>
             <article class="post" data-post>
                 <a class="more-link back-link" href="blogs.html">&larr; 全部文章</a>
                 <div data-post-content></div>
+                <section class="post-comments" id="comments" aria-labelledby="comments-title" tabindex="-1" hidden>
+                    <h2 id="comments-title">评论</h2>
+                    <p>评论区暂未开放。</p>
+                </section>
             </article>
         </section>
     </main>
