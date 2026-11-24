@@ -22,19 +22,20 @@ python3 -m http.server 8000
    title: 标题
    published: 2026-10-12
    description: 一句话简介
-   category: 多彩生活
+   category: Life
    ---
    ```
 
-   分类用中文，现有：多彩生活、学习心得、瞬息欢愉。
-3. 正文里图片用相对路径：`![](图片.jpg)`。不支持内嵌 HTML。
-4. 重建索引：
+   分类用英文，现有：`Life`、`Study`、`Leisure`。
+3. 正文里图片用相对路径：`![](图片.jpg)`，方括号内填写文字将渲染为图片下方可见图注（如 `![图注说明](图片.jpg)`）。不支持内嵌 HTML。
+4. 重建索引并校验站点：
 
    ```sh
    node scripts/build-blog-index.mjs
+   node scripts/check-site.mjs
    ```
 
-   改了标题、简介、分类、正文，或者删了文章，也要重跑这一步。
+   改了标题、简介、分类、正文，或者删了文章，也要重跑重建索引这一步。
 5. 本地预览确认无误后提交、推送。
 
 ## 部署

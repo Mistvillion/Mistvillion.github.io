@@ -2,7 +2,7 @@
 title: AI Coding 的工作流
 published: 2026-07-21
 description: Matt Pocock 的一次有关 AI Coding 的演讲内容总结
-category: 学习心得
+category: Study
 ---
 视频地址：[Workflow for AI Coding](https://www.youtube.com/watch?v=-QFHIoCo-Ko&t=1060s)
 

@@ -1,5 +1,5 @@
 /* Mistvillion's Home - global styles
-   Font: PT Serif only (full TTF, no subsetting). */
+   Zero-dependency static CSS; Latin uses local PT Serif TTF with CJK punctuation released to system Chinese fonts. */
 
 @font-face {
     font-family: "PT Serif";
@@ -7,6 +7,8 @@
     font-weight: 400;
     font-style: normal;
     font-display: swap;
+    /* 排除中文弯引号(U+2018-201D)、破折号(U+2013-2014)、省略号(U+2026)与间隔号(U+00B7)，交还中文字体排版。 */
+    unicode-range: U+0000-00B6, U+00B8-024F, U+1E00-1EFF, U+2020-2022, U+20AC, U+2122;
 }
 
 @font-face {
@@ -15,14 +17,19 @@
     font-weight: 700;
     font-style: normal;
     font-display: swap;
+    /* 排除中文弯引号(U+2018-201D)、破折号(U+2013-2014)、省略号(U+2026)与间隔号(U+00B7)，交还中文字体排版。 */
+    unicode-range: U+0000-00B6, U+00B8-024F, U+1E00-1EFF, U+2020-2022, U+20AC, U+2122;
 }
 
 :root {
     color-scheme: dark;
-    --ink: #f4f7fb;
-    --muted: rgba(244, 247, 251, 0.72);
-    --pink: #f7a8c4;
-    --page-base: #000;
+    --ink: #ebe6df;
+    --ink-body: rgba(235, 230, 223, 0.86);
+    --muted: rgba(235, 230, 223, 0.72);
+    --accent: #c9b08a;
+    --page-base: #0c0e10;
+    --surface-elevated: #14171a;
+    --line: rgba(235, 230, 223, 0.12);
     --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -32,8 +39,13 @@
 
 body {
     margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
     overflow-x: hidden;
-    font-family: "PT Serif", Georgia, "Times New Roman", serif;
+    /* 衬线优先；默认 Windows 未预装现代宋体，刻意跳过含点阵且无独立粗体的 SimSun，降级至清晰可读的微软雅黑。 */
+    font-family: "PT Serif", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "Microsoft YaHei", Georgia, serif;
     color: var(--ink);
     background: var(--page-base);
 }
@@ -45,26 +57,26 @@ a {
 /* Content is visible immediately; only the background fades in once loaded. */
 .page {
     position: relative;
-    min-height: 100vh;
-    min-height: 100dvh;
+    flex: 1 0 auto;
 }
 
 section:focus {
     outline: none;
 }
 
-/* First screen: photo, nav and title block. Everything below sits on black. */
+/* Cover (Home exclusive): full-screen artwork, title block and scroll hint. */
 .home {
     position: relative;
     isolation: isolate;
+    overflow: hidden;
     min-height: 100vh;
     min-height: 100svh;
     display: flex;
     align-items: flex-end;
-    padding: 96px 72px 58px;
+    padding: 96px 72px 92px;
 }
 
-/* Background image, confined to the first screen. */
+/* Background artwork confined to Cover or Page Banner. */
 .page-bg {
     position: absolute;
     inset: 0;
@@ -83,10 +95,11 @@ html.js .page-bg:not(.is-loaded) {
     transform: scale(1.02);
 }
 
-/* Directional shade: dark where text sits (top band for the nav,
-   bottom-left for the title), the rest of the photo stays clear. */
+/* Directional shade: charcoal-slate veil drawn from the painting's shadows. */
 .home::before,
-.home::after {
+.home::after,
+.page-banner::before,
+.page-banner::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -96,23 +109,76 @@ html.js .page-bg:not(.is-loaded) {
 .home::before {
     z-index: -2;
     background:
-        linear-gradient(to bottom, rgba(13, 20, 36, 0.42), rgba(13, 20, 36, 0) 180px),
-        radial-gradient(ellipse 85% 75% at 0% 100%, rgba(13, 20, 36, 0.78), rgba(13, 20, 36, 0.38) 45%, rgba(13, 20, 36, 0) 75%),
-        linear-gradient(rgba(13, 20, 36, 0.1), rgba(13, 20, 36, 0.1));
+        linear-gradient(to bottom, rgba(10, 14, 16, 0.36), rgba(10, 14, 16, 0) 180px),
+        radial-gradient(ellipse 85% 75% at 0% 100%, rgba(10, 14, 16, 0.62), rgba(10, 14, 16, 0.28) 45%, rgba(10, 14, 16, 0) 75%),
+        linear-gradient(rgba(10, 14, 16, 0.06), rgba(10, 14, 16, 0.06));
 }
 
-/* Bottom of the photo dissolves into the black page below. */
+/* Bottom of the Cover dissolves seamlessly into --page-base. */
 .home::after {
     top: auto;
     z-index: -1;
     height: 38%;
     background: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0),
-        rgba(0, 0, 0, 0.2) 30%,
-        rgba(0, 0, 0, 0.62) 65%,
-        #000
+        rgba(12, 14, 16, 0),
+        rgba(12, 14, 16, 0.22) 30%,
+        rgba(12, 14, 16, 0.68) 65%,
+        var(--page-base)
     );
+}
+
+/* Page Banner (Blogs index): lightweight cropped artwork framing the upper lilies, hat brim, and gaze. */
+.page-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: clamp(240px, 34vh, 340px);
+    height: clamp(240px, 34svh, 340px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 88px 72px 28px;
+}
+
+.page-banner .page-bg {
+    object-position: center 22%;
+}
+
+.page-banner::before {
+    z-index: -2;
+    background: linear-gradient(
+        to bottom,
+        rgba(10, 14, 16, 0.44),
+        rgba(10, 14, 16, 0.16) 55%,
+        rgba(10, 14, 16, 0.28)
+    );
+}
+
+.page-banner::after {
+    top: auto;
+    z-index: -1;
+    height: 62%;
+    background: linear-gradient(
+        to bottom,
+        rgba(12, 14, 16, 0),
+        rgba(12, 14, 16, 0.34) 40%,
+        rgba(12, 14, 16, 0.78) 76%,
+        var(--page-base)
+    );
+}
+
+.page-banner-inner {
+    width: min(780px, 100%);
+}
+
+.page-banner-title {
+    margin: 0;
+    color: var(--accent);
+    font-size: clamp(2.1rem, 3.2vw, 3.1rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: 0.01em;
 }
 
 /* Nav pinned to the top right of the viewport; the bar itself ignores
@@ -152,13 +218,13 @@ html.js .page-bg:not(.is-loaded) {
     align-items: center;
     justify-content: center;
     padding: 0 12px;
-    color: rgba(244, 247, 251, 0.74);
+    color: rgba(235, 230, 223, 0.76);
     text-decoration: none;
     white-space: nowrap;
     font: inherit;
     font-size: 1.12rem;
     letter-spacing: 0.03em;
-    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+    text-shadow: 0 1px 12px rgba(8, 11, 13, 0.5);
     transition: color 180ms ease;
 }
 
@@ -173,12 +239,12 @@ html.js .page-bg:not(.is-loaded) {
     text-underline-offset: 6px;
 }
 
-/* Current page: pink text. */
+/* Current page: accent text. */
 .nav-link[aria-current="page"] {
-    color: var(--pink);
+    color: var(--accent);
 }
 
-/* Scroll-down hint at the bottom centre of the first screen. */
+/* Scroll-down hint at the bottom centre of Cover. */
 .scroll-hint {
     position: absolute;
     left: 50%;
@@ -188,7 +254,7 @@ html.js .page-bg:not(.is-loaded) {
     padding: 0;
     border: 0;
     background: none;
-    color: rgba(244, 247, 251, 0.82);
+    color: rgba(235, 230, 223, 0.82);
     cursor: pointer;
     transform: translateX(-50%);
     animation: scroll-hint-bounce 1.8s ease-in-out infinite;
@@ -204,12 +270,12 @@ html.js .page-bg:not(.is-loaded) {
     border-right: 2px solid currentColor;
     border-bottom: 2px solid currentColor;
     transform: translate(-50%, -75%) rotate(45deg);
-    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 1px 6px rgba(8, 11, 13, 0.55));
 }
 
 .scroll-hint:hover,
 .scroll-hint:focus-visible {
-    color: var(--pink);
+    color: var(--accent);
     outline: none;
 }
 
@@ -225,8 +291,8 @@ html.js .page-bg:not(.is-loaded) {
 
 .site-title {
     margin: 0;
-    color: var(--pink);
-    font-size: clamp(2.5rem, 4.1vw, 4.3rem);
+    color: var(--accent);
+    font-size: clamp(2.2rem, 2.35vw + 1.65rem, 4.3rem);
     font-weight: 700;
     line-height: 1.08;
     letter-spacing: 0.01em;
@@ -239,10 +305,10 @@ html.js .page-bg:not(.is-loaded) {
     font-size: clamp(1.05rem, 1.55vw, 1.5rem);
     line-height: 1.75;
     letter-spacing: 0.015em;
-    text-wrap: pretty;
+    text-wrap: balance;
 }
 
-/* Sections below the first screen. */
+/* Sections below Cover or Page Banner. */
 .content-section {
     display: flex;
     justify-content: center;
@@ -251,6 +317,10 @@ html.js .page-bg:not(.is-loaded) {
 
 .content-section + .content-section {
     padding-top: 0;
+}
+
+.blogs-view {
+    padding-top: 28px;
 }
 
 .section-inner,
@@ -264,10 +334,10 @@ html.js .page-bg:not(.is-loaded) {
 
 .section-title {
     margin: 0;
-    color: var(--pink);
-    font-size: clamp(2.2rem, 3.4vw, 3.4rem);
+    color: var(--accent);
+    font-size: clamp(1.75rem, 2.4vw, 2.4rem);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.15;
     letter-spacing: 0.01em;
 }
 
@@ -277,11 +347,10 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .profile-content p {
-    max-width: 62ch;
     margin: 0;
-    color: rgba(244, 247, 251, 0.86);
-    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
-    line-height: 1.8;
+    color: var(--ink-body);
+    font-size: clamp(1rem, 0.35vw + 0.85rem, 1.15rem);
+    line-height: 1.85;
     letter-spacing: 0.01em;
     text-wrap: pretty;
 }
@@ -298,17 +367,17 @@ html.js .page-bg:not(.is-loaded) {
     color: var(--ink);
 }
 
-/* Post list (Latest writing and Blogs). */
+/* Post list (Latest Writing and Blogs). */
 .post-list {
     width: 100%;
     margin: 8px 0 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--line);
 }
 
 .post-item {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid var(--line);
 }
 
 .post-link {
@@ -335,11 +404,11 @@ html.js .page-bg:not(.is-loaded) {
 
 .post-link:hover .post-title,
 .post-link:focus-visible .post-title {
-    color: var(--pink);
+    color: var(--accent);
 }
 
 .post-link:focus-visible {
-    outline: 1px solid rgba(255, 255, 255, 0.5);
+    outline: 1px solid rgba(235, 230, 223, 0.52);
     outline-offset: 4px;
 }
 
@@ -354,7 +423,7 @@ html.js .page-bg:not(.is-loaded) {
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 14px;
-    color: rgba(244, 247, 251, 0.56);
+    color: rgba(235, 230, 223, 0.58);
     font-size: 0.9rem;
     letter-spacing: 0.02em;
 }
@@ -364,15 +433,15 @@ html.js .page-bg:not(.is-loaded) {
     color: var(--muted);
 }
 
-/* Category tags. */
+/* Category tags and interactive filter buttons. */
 .tag {
     display: inline-flex;
     align-items: center;
     min-height: 26px;
     padding: 0 10px;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    border: 1px solid rgba(235, 230, 223, 0.26);
     border-radius: 999px;
-    color: rgba(244, 247, 251, 0.82);
+    color: rgba(235, 230, 223, 0.82);
     background: transparent;
     font: inherit;
     font-size: 0.85rem;
@@ -393,6 +462,8 @@ html.js .page-bg:not(.is-loaded) {
 .category-filter .tag {
     min-height: 32px;
     padding: 0 14px;
+    /* 42% 暖象牙白在 #0c0e10 上对比度约 3.5:1，满足 WCAG 2.2 SC 1.4.11 非文本对比度要求。 */
+    border-color: rgba(235, 230, 223, 0.42);
     cursor: pointer;
     transition:
         color 180ms ease,
@@ -400,19 +471,23 @@ html.js .page-bg:not(.is-loaded) {
         background-color 180ms ease;
 }
 
-.category-filter .tag:hover,
+.category-filter .tag:hover {
+    border-color: rgba(235, 230, 223, 0.76);
+}
+
 .category-filter .tag:focus-visible {
-    border-color: rgba(255, 255, 255, 0.6);
-    outline: none;
+    border-color: rgba(235, 230, 223, 0.76);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .category-filter .tag[aria-pressed="true"] {
     border-color: var(--ink);
-    color: #000;
+    color: var(--page-base);
     background: var(--ink);
 }
 
-/* Single post. */
+/* Single Post. */
 .post-view {
     padding-top: 128px;
 }
@@ -426,15 +501,21 @@ html.js .page-bg:not(.is-loaded) {
     gap: 16px;
     margin: 28px 0 40px;
     padding-bottom: 32px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid var(--line);
 }
 
-.post-header .section-title {
+.post-heading {
+    margin: 0;
+    color: var(--accent);
+    font-size: clamp(1.9rem, 2.7vw, 2.65rem);
+    font-weight: 700;
     line-height: 1.25;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
 }
 
 .post-body {
-    color: rgba(244, 247, 251, 0.86);
+    color: var(--ink-body);
     font-size: 1.08rem;
     line-height: 1.9;
     overflow-wrap: break-word;
@@ -473,7 +554,7 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .post-body a {
-    color: var(--pink);
+    color: var(--accent);
     text-underline-offset: 3px;
 }
 
@@ -488,8 +569,12 @@ html.js .page-bg:not(.is-loaded) {
 
 .post-body blockquote {
     padding-left: 1em;
-    border-left: 2px solid rgba(255, 255, 255, 0.24);
+    border-left: 2px solid rgba(235, 230, 223, 0.28);
     color: var(--muted);
+}
+
+.post-body figure {
+    margin: 2em 0;
 }
 
 .post-body img {
@@ -500,10 +585,19 @@ html.js .page-bg:not(.is-loaded) {
     border-radius: 4px;
 }
 
+.post-body figcaption {
+    margin-top: 0.75em;
+    color: rgba(235, 230, 223, 0.58);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    text-align: center;
+    text-wrap: balance;
+}
+
 .post-body code {
     padding: 0.1em 0.35em;
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(235, 230, 223, 0.08);
     font-size: 0.9em;
 }
 
@@ -511,7 +605,7 @@ html.js .page-bg:not(.is-loaded) {
     overflow-x: auto;
     padding: 16px 18px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(235, 230, 223, 0.05);
     line-height: 1.6;
 }
 
@@ -523,7 +617,7 @@ html.js .page-bg:not(.is-loaded) {
 .post-body hr {
     margin: 2.5em 0;
     border: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--line);
 }
 
 .post-body table {
@@ -535,11 +629,11 @@ html.js .page-bg:not(.is-loaded) {
 .post-body th,
 .post-body td {
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid var(--line);
     text-align: left;
 }
 
-/* 文末评论锚点与左侧目录。 */
+/* 文末评论锚点与左侧 TOC Rail。 */
 .post-body [data-toc-heading],
 .post-comments {
     scroll-margin-top: clamp(64px, 12vh, 88px);
@@ -548,11 +642,11 @@ html.js .page-bg:not(.is-loaded) {
 .post-comments {
     margin-top: clamp(56px, 7vw, 88px);
     padding-top: 24px;
-    border-top: 1px solid rgba(244, 247, 251, 0.14);
+    border-top: 1px solid rgba(235, 230, 223, 0.14);
 }
 
 .post-comments:focus-visible {
-    outline: 1px solid var(--pink);
+    outline: 1px solid var(--accent);
     outline-offset: 6px;
 }
 
@@ -580,10 +674,10 @@ html.js .page-bg:not(.is-loaded) {
     gap: 6px;
     min-height: 40px;
     padding: 0 10px;
-    border: 1px solid rgba(244, 247, 251, 0.2);
+    border: 1px solid rgba(235, 230, 223, 0.22);
     border-radius: 8px;
     color: var(--muted);
-    background: #111114;
+    background: var(--surface-elevated);
     font: inherit;
     font-size: 0.85rem;
     cursor: pointer;
@@ -591,7 +685,7 @@ html.js .page-bg:not(.is-loaded) {
 
 .post-toc-toggle:hover,
 .post-toc-toggle[aria-expanded="true"] {
-    color: var(--pink);
+    color: var(--accent);
 }
 
 .post-toc-toggle svg,
@@ -602,7 +696,7 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .post-toc-panel {
-    --toc-row-highlight: rgba(244, 247, 251, 0.06);
+    --toc-row-highlight: rgba(235, 230, 223, 0.06);
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
@@ -611,10 +705,10 @@ html.js .page-bg:not(.is-loaded) {
     width: min(18rem, calc(100vw - 24px));
     max-height: min(65dvh, 30rem);
     overflow: hidden;
-    border: 1px solid rgba(244, 247, 251, 0.16);
+    border: 1px solid rgba(235, 230, 223, 0.16);
     border-radius: 12px;
-    background: #111114;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+    background: var(--surface-elevated);
+    box-shadow: 0 10px 28px rgba(4, 6, 8, 0.65);
 }
 
 .post-toc-toggle[aria-expanded="true"] + .post-toc-panel {
@@ -655,7 +749,7 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .post-toc-map:has(:where(li)) + .post-toc-comments {
-    border-top: 1px solid rgba(244, 247, 251, 0.12);
+    border-top: 1px solid var(--line);
 }
 
 .post-toc-panel a:is(:hover, :focus-visible, [aria-current="location"]) {
@@ -664,11 +758,11 @@ html.js .page-bg:not(.is-loaded) {
 }
 
 .post-toc-panel a[aria-current="location"] {
-    color: var(--pink);
+    color: var(--accent);
 }
 
 .post-toc :is(a, button):focus-visible {
-    outline: 1px solid var(--pink);
+    outline: 1px solid var(--accent);
     outline-offset: -2px;
 }
 
@@ -676,13 +770,16 @@ html.js .page-bg:not(.is-loaded) {
     overflow-wrap: anywhere;
 }
 
-/* 宽屏利用正文左侧的空白；触屏仍使用可点开的目录。 */
+/* 宽屏桌面端 TOC Rail 锚定在 760px 正文左侧，宽屏恒留 28px 间距，较窄桌面自动收缩防碰撞。 */
 @media (min-width: 1160px) and (hover: hover) and (pointer: fine) {
     .post-toc {
         --toc-rail-x: 12px;
+        --toc-w: 14rem;
+        --toc-gap: 28px;
         top: clamp(78px, 12vh, 112px);
         bottom: max(16px, env(safe-area-inset-bottom));
-        width: min(17rem, calc(50vw - 412px));
+        left: max(12px, env(safe-area-inset-left), calc(50vw - 380px - var(--toc-w) - var(--toc-gap)));
+        width: min(var(--toc-w), calc(50vw - 392px - var(--toc-gap)));
     }
 
     .post-toc-toggle {
@@ -731,8 +828,8 @@ html.js .page-bg:not(.is-loaded) {
         transform: translateX(-50%);
         background: linear-gradient(
             to bottom,
-            var(--pink) 0 var(--toc-progress, 0%),
-            rgba(244, 247, 251, 0.22) var(--toc-progress, 0%) 100%
+            var(--accent) 0 var(--toc-progress, 0%),
+            rgba(235, 230, 223, 0.22) var(--toc-progress, 0%) 100%
         );
     }
 
@@ -755,7 +852,7 @@ html.js .page-bg:not(.is-loaded) {
         height: 5px;
         border-radius: 50%;
         transform: translate(-50%, -50%);
-        background: #87878c;
+        background: #8a8681;
     }
 
     .post-toc-link:is(:hover, :focus-visible)::before {
@@ -763,8 +860,8 @@ html.js .page-bg:not(.is-loaded) {
     }
 
     .post-toc-link[aria-current="location"]::before {
-        background: var(--pink);
-        box-shadow: 0 0 0 3px rgba(247, 168, 196, 0.16);
+        background: var(--accent);
+        box-shadow: 0 0 0 3px rgba(201, 176, 138, 0.2);
     }
 
     .post-toc-map + .post-toc-comments {
@@ -786,6 +883,27 @@ html.js .page-bg:not(.is-loaded) {
     }
 }
 
+/* Site Footer: persistent single-line copyright bar mounted directly under <body>. */
+.site-footer {
+    display: flex;
+    justify-content: center;
+    padding: 0 72px 48px;
+}
+
+.site-footer-inner {
+    width: min(780px, 100%);
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+}
+
+.site-footer-copy {
+    margin: 0;
+    color: rgba(235, 230, 223, 0.56);
+    font-size: 0.875rem;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+}
+
 /* Responsive spacing for phones. */
 @media (max-width: 640px) {
     .top-nav {
@@ -803,35 +921,35 @@ html.js .page-bg:not(.is-loaded) {
     }
 
     .home {
-        padding: 88px 24px 30px;
+        padding: 88px 24px 88px;
+    }
+
+    .page-banner {
+        padding: 72px 24px 20px;
     }
 
     .content-section {
         padding: 64px 24px;
     }
 
-    .post-view {
-        padding-top: 88px;
+    .blogs-view {
+        padding-top: 20px;
     }
 
-    .site-title {
-        font-size: 2.6rem;
+    .post-view {
+        padding-top: 88px;
     }
 
     .site-sub {
         font-size: 1.05rem;
     }
 
-    .section-title {
-        font-size: 2.1rem;
-    }
-
-    .profile-content p {
-        font-size: 1.05rem;
-    }
-
     .post-body {
         font-size: 1rem;
+    }
+
+    .site-footer {
+        padding: 0 24px 36px;
     }
 }
 
@@ -841,25 +959,95 @@ html.js .page-bg:not(.is-loaded) {
         font-size: 0.92rem;
     }
 
-    .site-title {
-        font-size: 2.2rem;
-    }
-
     .site-sub {
-        font-size: 1rem;
-    }
-
-    .profile-content p {
         font-size: 1rem;
     }
 }
 
-/* Internal page swaps: the unchanged nav makes the root
-   cross-fade read as a content-only transition. */
+/* Internal page swaps: default root cross-fade for non-backdrop transitions. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation-duration: 220ms;
     animation-timing-function: var(--motion-soft);
+}
+
+/* Shared artwork curtain transition between Home Cover and Blogs Page Banner. */
+html.vt-shared-backdrop .top-nav {
+    view-transition-name: site-nav;
+}
+
+html.vt-shared-backdrop .home,
+html.vt-shared-backdrop .page-banner {
+    view-transition-name: site-backdrop;
+}
+
+html.vt-shared-backdrop .blogs-view {
+    view-transition-name: site-list;
+}
+
+::view-transition-group(site-nav) {
+    z-index: 2;
+    animation-duration: 360ms;
+    animation-timing-function: var(--motion-soft);
+}
+
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+    animation-duration: 180ms;
+    animation-timing-function: var(--motion-soft);
+}
+
+::view-transition-group(site-backdrop) {
+    z-index: 1;
+    overflow: clip;
+    animation-duration: 360ms;
+    animation-timing-function: var(--motion-soft);
+}
+
+::view-transition-old(site-backdrop),
+::view-transition-new(site-backdrop) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 22%;
+    animation-duration: 360ms;
+    animation-timing-function: var(--motion-soft);
+}
+
+/* 保持较矮的 Page Banner 快照维持原始 1:1 比例，避免动画高框端被 object-fit: cover 放大裁飞。 */
+html.vt-to-banner::view-transition-new(site-backdrop),
+html.vt-to-cover::view-transition-old(site-backdrop) {
+    height: auto;
+}
+
+::view-transition-new(site-list):only-child {
+    animation: vt-list-enter 320ms var(--motion-soft) both;
+}
+
+::view-transition-old(site-list):only-child {
+    animation: vt-list-leave 200ms var(--motion-soft) both;
+}
+
+@keyframes vt-list-enter {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes vt-list-leave {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(8px);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -881,5 +1069,11 @@ html.js .page-bg:not(.is-loaded) {
 
     html.js .page-bg:not(.is-loaded) {
         transform: none;
+    }
+
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
     }
 }

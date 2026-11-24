@@ -21,23 +21,26 @@
             </div>
         </nav>
 
-        <section class="home" aria-labelledby="site-title">
+        <section class="page-banner" aria-labelledby="blogs-title">
             <img class="page-bg" src="assets/images/background2.webp" alt="" width="1200" height="675" fetchpriority="high" decoding="async">
-            <div class="title-block">
-                <h1 class="site-title" id="site-title">Mistvillion's Blogs</h1>
-                <p class="site-sub">Such feeling cannot be recalled again; It seemed long lost e'en when it was felt then.</p>
+            <div class="page-banner-inner">
+                <h1 class="page-banner-title" id="blogs-title">Blogs</h1>
             </div>
-            <button class="scroll-hint" type="button" aria-label="Scroll down"></button>
         </section>
 
-        <section class="content-section blogs-view" aria-labelledby="posts-title" lang="zh-CN">
+        <section class="content-section blogs-view" aria-label="文章列表" lang="zh-CN">
             <div class="section-inner">
-                <h2 class="section-title" id="posts-title">Blogs</h2>
                 <div class="category-filter" data-category-filter role="group" aria-label="按分类筛选"></div>
                 <ol class="post-list" data-post-list></ol>
             </div>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <p class="site-footer-copy">&copy; 2025&ndash;2026 Mistvillion</p>
+        </div>
+    </footer>
 
     <script src="assets/js/site.js"></script>
 </body>

@@ -5,7 +5,7 @@
     "path": "blogs/2026-10-19-Oskar-Concert/index.md",
     "title": "一音一韵，皆是深情",
     "description": "奥斯卡罗曼耶卓2026年中国巡演珠海站",
-    "category": "多彩生活",
+    "category": "Life",
     "minutes": 3
   },
   {
@@ -13,8 +13,8 @@
     "published": "2026-07-30",
     "path": "blogs/2026-07-30-HongKong/index.md",
     "title": "雾锁维港，霓虹入梦",
-    "description": "7.25～7.27 香港三日游记",
-    "category": "多彩生活",
+    "description": "7.25～7.27、11.14～11.15 香港游记",
+    "category": "Life",
     "minutes": 13
   },
   {
@@ -23,7 +23,7 @@
     "path": "blogs/2026-07-21-Workflow-for-AI-Coding/index.md",
     "title": "AI Coding 的工作流",
     "description": "Matt Pocock 的一次有关 AI Coding 的演讲内容总结",
-    "category": "学习心得",
+    "category": "Study",
     "minutes": 14
   },
   {
@@ -32,7 +32,7 @@
     "path": "blogs/2026-02-12-Hollow-Knight/index.md",
     "title": "神圣静穆，丝与灵魂",
     "description": "《空洞骑士》与《丝之歌》玩后感受",
-    "category": "瞬息欢愉",
+    "category": "Leisure",
     "minutes": 5
   },
   {
@@ -41,7 +41,7 @@
     "path": "blogs/2026-01-24-Travel-JiangZheHu/index.md",
     "title": "烟柳画桥，风帘翠幕",
     "description": "2026年1月18日至1月23日在上海、苏州、杭州游玩日记",
-    "category": "多彩生活",
+    "category": "Life",
     "minutes": 4
   },
   {
@@ -50,7 +50,7 @@
     "path": "blogs/2025-07-04-Expedition33/index.md",
     "title": "绘我本真，一生去爱",
     "description": "《光与影：33号远征队》玩后感受，涉及剧透！",
-    "category": "瞬息欢愉",
+    "category": "Leisure",
     "minutes": 8
   }
 ]

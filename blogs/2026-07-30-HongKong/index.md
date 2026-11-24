@@ -1,8 +1,8 @@
 ---
 title: 雾锁维港，霓虹入梦
 published: 2026-07-30
-description: 7.25～7.27 香港三日游记
-category: 多彩生活
+description: 7.25～7.27、11.14～11.15 香港游记
+category: Life
 ---
 香港是一座需要用脚步慢慢读懂的城市。
 

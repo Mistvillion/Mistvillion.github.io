@@ -7,5 +7,7 @@ __pycache__/
 docs/
 AGENTS.md
 CONTEXT.md
+GLOSSARY.md
+.scratch/
 
 .obsidian

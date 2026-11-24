@@ -2,7 +2,7 @@
 title: 绘我本真，一生去爱
 published: 2025-07-04
 description: 《光与影：33号远征队》玩后感受，涉及剧透！
-category: 瞬息欢愉
+category: Leisure
 ---
 ## 美好年代
 

@@ -27,10 +27,11 @@
 
     /* ---------- Text ---------- */
 
-    /* Hero and navigation are English; everything below the fold is Chinese. */
+    /* Bilingual Chrome: navigation, page titles, section headings, and category labels are English;
+       body copy, reading time, and interactive UI feedback are Chinese. */
     const TEXT = {
         "blogs.title": "Mistvillion's Blogs",
-        "all": "全部",
+        "all": "All",
         "minRead": " 分钟阅读",
         "empty": "暂无文章。",
         "listFailed": "文章列表加载失败。",
@@ -236,6 +237,7 @@
         let i = 0;
 
         const isBlank = (line) => !line.trim();
+        const standaloneImage = /^!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)$/;
         const listMatch = (line) => line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
         const startsBlock = (line) =>
             /^(#{1,6})\s/.test(line) || /^```/.test(line) || /^>/.test(line) ||
@@ -356,6 +358,18 @@
             while (i < lines.length && !isBlank(lines[i]) && !(paragraph.length && startsBlock(lines[i]))) {
                 paragraph.push(lines[i].trim());
                 i += 1;
+            }
+            const figure = paragraph.length === 1 && paragraph[0].match(standaloneImage);
+            if (figure) {
+                const caption = figure[1].trim();
+                const src = escapeHtml(safeUrl(resolveUrl(figure[2], base)));
+                // 遵循 ADR-0001：非空方括号文本渲染为可见 figcaption，对应 img 的 alt 置空以防屏幕阅读器重复朗读。
+                html.push(
+                    '<figure><img src="' + src + '" alt="" loading="lazy" decoding="async">' +
+                    (caption ? "<figcaption>" + escapeHtml(caption) + "</figcaption>" : "") +
+                    "</figure>"
+                );
+                continue;
             }
             html.push("<p>" + renderInline(paragraph.join(" "), base) + "</p>");
         }
@@ -571,7 +585,8 @@
             reactionsEnabled: "1",
             emitMetadata: "0",
             inputPosition: "bottom",
-            theme: "dark",
+            // 选用 transparent_dark 透出页面基底色；排除 noborder_dark（实测为不透明 #1e1e20 灰底 + 荧光薄荷绿强调色）。
+            theme: "transparent_dark",
             lang: "zh-CN",
             loading: "lazy"
         });
@@ -602,7 +617,7 @@
         }
 
         const header = el("header", "post-header");
-        const title = el("h1", "section-title", post.title);
+        const title = el("h1", "post-heading", post.title);
         header.append(title, postMeta(post, true));
 
         let body;
@@ -633,8 +648,9 @@
         applyTitle();
         fadeInBackground(root);
         hydrateProfile(root);
-        hydratePostLists(root);
+        const listsReady = hydratePostLists(root);
         hydratePost(root);
+        return listsReady;
     }
 
     hydrate(document);
@@ -791,8 +807,29 @@
 
     /* ---------- Navigation ---------- */
 
+    const ARTWORK_SELECTOR = ".home, .page-banner";
+    const VT_CLASSES = ["vt-shared-backdrop", "vt-to-banner", "vt-to-cover"];
     let navigating = false;
     let renderedPageKey = pageKey(window.location);
+    let vtToken = 0;
+
+    function clearBackdropTransitionClasses() {
+        document.documentElement.classList.remove(...VT_CLASSES);
+    }
+
+    function getSharedBackdropDirection(doc) {
+        const currentMain = document.querySelector("main.page");
+        const currentArtwork = currentMain && currentMain.querySelector(ARTWORK_SELECTOR);
+        const nextArtwork = doc.querySelector("main.page " + ARTWORK_SELECTOR);
+        if (!currentArtwork || !nextArtwork || window.scrollY >= window.innerHeight * 0.5) {
+            return null;
+        }
+        const rect = currentArtwork.getBoundingClientRect();
+        if (!(rect.height > 0 && rect.bottom > rect.height * 0.5)) {
+            return null;
+        }
+        return nextArtwork.classList.contains("page-banner") ? "vt-to-banner" : "vt-to-cover";
+    }
 
     function fragmentTarget(hash) {
         try {
@@ -813,26 +850,57 @@
         navigating = true;
 
         let doc;
+        let listsReady = Promise.resolve();
         const swap = () => {
             if (updateHistory) {
                 history.pushState(null, "", url);
             }
             const main = applyDocument(doc, url);
             renderedPageKey = pageKey(window.location);
-            hydrate(main);
+            listsReady = hydrate(main);
             return main;
+        };
+
+        const swapForTransition = async () => {
+            swap();
+            await Promise.race([
+                listsReady,
+                new Promise((resolve) => setTimeout(resolve, 120))
+            ]);
         };
 
         try {
             doc = await loadPage(url);
             if (prefersReducedMotion.matches) {
+                vtToken += 1;
+                clearBackdropTransitionClasses();
                 swap();
             } else if (typeof document.startViewTransition === "function") {
-                await document.startViewTransition(swap).updateCallbackDone;
+                const direction = getSharedBackdropDirection(doc);
+                if (direction) {
+                    const token = ++vtToken;
+                    clearBackdropTransitionClasses();
+                    document.documentElement.classList.add("vt-shared-backdrop", direction);
+                    const clearShared = () => {
+                        if (vtToken === token) {
+                            clearBackdropTransitionClasses();
+                        }
+                    };
+                    const transition = document.startViewTransition(swapForTransition);
+                    transition.finished.then(clearShared, clearShared);
+                    await transition.updateCallbackDone;
+                } else {
+                    vtToken += 1;
+                    clearBackdropTransitionClasses();
+                    const transition = document.startViewTransition(swapForTransition);
+                    transition.finished.catch(() => {});
+                    await transition.updateCallbackDone;
+                }
             } else {
                 fadeIn(swap());
             }
         } catch (error) {
+            clearBackdropTransitionClasses();
             window.location.href = url;
         } finally {
             navigating = false;
